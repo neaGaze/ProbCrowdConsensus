@@ -1,0 +1,11 @@
+{
+  "name": "probcrowdconsensus",
+  "version": "1.0.0",
+  "description": "The probabilistic approach to finding Pareto-Optimal Objects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "nigesh",
+  "license": "ISC"
+}
