@@ -1,6 +1,6 @@
 {
   "CROWD_CONSENSUS_MONGO_URL" : "mongodb://neaGaze:neaGaze@ds153729.mlab.com:53729/crowdconsensus2",
-  "THRESHOLD" : 3,
+  "THRESHOLD" : 2,
   "NUMBER_OF_USERS_TO_ASK" : 3,
   "ACCESS_TOKEN" : "xoxp-78451975635-78500569622-132219435238-c67da9b4fa70cd7ff38ce13351a16da7",
   "BOT_ID" : "xoxb-78512651905-LanZH8Zna1AL9HvUgvxizlb0",

@@ -49,9 +49,8 @@ app.get('/', function (req, res) {
 * For initializing the SlackBot
 **************************************/
 var controller = Botkit.slackbot({
-  interactive_replies: true // tells botkit to send button clicks into conversations
-  // interactive_replies: true,
-  //json_file_store: './db_slackbutton_bot/',
+  interactive_replies: true, // tells botkit to send button clicks into conversations
+  json_file_store: './db_slackbutton_bot/'
   // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
 }).configureSlackApp(
   {
@@ -61,6 +60,7 @@ var controller = Botkit.slackbot({
   }
 );
 
+/*
 controller.spawn({
   token: nconf.get("BOT_ID")
 }).startRTM(function(err) {
@@ -68,6 +68,7 @@ controller.spawn({
     throw new Error(err);
   }
 });
+*/
 
 controller.setupWebserver(port, function(err,webserver) {
   controller.createWebhookEndpoints(controller.webserver);
@@ -90,6 +91,26 @@ var _bots = {};
 function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
+
+controller.storage.teams.all(function(err,teams) {
+  if (err) {
+    throw new Error(err);
+  }
+
+  // connect all teams with bots up to slack!
+  for (var t  in teams) {
+    if (teams[t].bot) {
+      controller.spawn(teams[t]).startRTM(function(err, bot) {
+        if (err) {
+          console.log('Error connecting bot to Slack:',err);
+        } else {
+          console.log('connected the bot to Slack:',err);
+          trackBot(bot);
+        }
+      });
+    }
+  }
+});
 
 
 /***
@@ -172,7 +193,12 @@ controller.on('file_share', function(bot, message) {
 /******************************************************************************
 * Find the name of the user from the given Id
 *********************************************************************************/
-var lookupUserNameFromId = function(userId, members) {
+var lookupUserNameFromId = function(userId) {
+
+  return userId;
+
+  var members = [];
+    // previous one
   for(var mem in members) {
     if(members[mem].id == userId)
     return members[mem].name;
@@ -195,8 +221,14 @@ var questionLooper = function(cb_id, bot, message){
   /* <<<<<<<< Ends Dummy Question >>>>>>>>>>>>>> */
 
   // schedule the questions to the different users and gather their responses
-  var quesInquirer = new QuesInquirer(replyParam);
-  quesInquirer.on('ask', function(userid){
+  //var quesInquirer = new QuesInquirer(replyParam);
+  //QuesInquirer.create(replyParam);
+  //QuesInquirer.self = QuesInquirer.getInstance();
+  //console.log("_____How is this null? _______" + QuesInquirer.self);
+
+  var quesInquirer = QuesInquirer.create(replyParam);
+
+  QuesInquirer.getInstance().on('ask', function(userid){
 
     console.log('__userid to ask question____' + userid);
 
@@ -206,7 +238,7 @@ var questionLooper = function(cb_id, bot, message){
         console.log(err);
         return;
       }
-      
+
       convo.ask({
         delete_original : true,
         attachments:[
@@ -246,8 +278,9 @@ var questionLooper = function(cb_id, bot, message){
             '* is better than *' + replyParam.object2 + '* on criteria *' + replyParam.criterion+'*');
             convo.next();
 
-            var username = lookupUserNameFromId(reply.user, members);
-            console.log("The username is : " + username);
+            var username = lookupUserNameFromId(reply.user);
+            console.log("The username is : " + reply.user);
+            QuesInquirer.getInstance().answerRecorded();
             //saveInDB(bot, cb_id, reply.user, username, replyParam, '&gt;', timerQues, timeoutDelay);
           }
         },
@@ -258,8 +291,9 @@ var questionLooper = function(cb_id, bot, message){
             convo.say('You said  *' + replyParam.object2 +
             '* is better than *' + replyParam.object1 + '* on criteria *' + replyParam.criterion+'*');
             convo.next();
-            var username = lookupUserNameFromId(reply.user, members);
-            console.log("The username is : " + username);
+            var username = lookupUserNameFromId(reply.user);
+            console.log("The username is : " + reply.user);
+            QuesInquirer.getInstance().answerRecorded();
             //saveInDB(bot, cb_id, reply.user, username, replyParam, '&lt;', timerQues, timeoutDelay);
           }
         },
@@ -270,9 +304,9 @@ var questionLooper = function(cb_id, bot, message){
             convo.say('You said  *' + replyParam.object2 +
             '* is indifferent to *' + replyParam.object1 + '* on criteria *' + replyParam.criterion+'*');
             convo.next();
-            var username = lookupUserNameFromId(reply.user, members);
-            console.log("The username is : " + username);
-
+            var username = lookupUserNameFromId(reply.user);
+            console.log("The username is : " + reply.user);
+            QuesInquirer.getInstance().answerRecorded();
             //process.exit(1);
             //saveInDB(bot, cb_id, reply.user, username, replyParam, '&#126;', timerQues, timeoutDelay);
           }
@@ -290,8 +324,9 @@ var questionLooper = function(cb_id, bot, message){
     });
   });
 
+  // find the active users list
   quesInquirer.on('get_users', function(tmp){
-    console.log('Delegated the responsibilitiy to find users to the controller');
+    console.log('**\n Delegated the responsibilitiy to find users to the controller \n**');
 
     bot.api.users.list({}, function(err, res){
       if(err) {
@@ -300,24 +335,26 @@ var questionLooper = function(cb_id, bot, message){
       }
 
       if(!err) {
+        QuesInquirer.getInstance().activeUsers = [];
         for(var member in res.members){
-          if(!res.members[member].is_bot)
-            quesInquirer.activeUsers.push(res.members[member]);
+          if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT') {
+            QuesInquirer.getInstance().activeUsers.push(res.members[member]);
+          }
         }
-        console.log('___The number of active users: ' + res.members.length);
-        quesInquirer.findBestUsers();
+        QuesInquirer.getInstance().findBestUsers();
       }
     });
   });
 
 
   quesInquirer.on('min_threshold_satisfied', function(userid){
-    console.log('threshold of number of users to ask is reached. Time to ask new question');
-    //questionLooper(cb_id, bot, message);
+    console.log('**\n Threshold of number of users to ask is reached. Time to ask new question \n**');
+    questionLooper(cb_id, bot, message);
+    QuesInquirer.getInstance() == null;
   });
 
   quesInquirer.on('finish', function(paretoOptimalObjects){
-    console.log('The pareto-optimal objects are found ');
+    console.log('**\n The pareto-optimal objects are found \n**');
     bot.reply(message, "You have not more questions left to answer");
   });
 

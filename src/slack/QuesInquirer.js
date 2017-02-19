@@ -3,64 +3,94 @@ nconf = require('nconf'),
 math = require('mathjs'),
 EventEmitter = require('events').EventEmitter;
 
-var minUserThreshold = nconf.get('NUMBER_OF_USERS_TO_ASK'),
- questionThreshold = nconf.get('THRESHOLD');
 /*
 var QuesInquirer = function(number, isFirstReply){
-EventEmitter.call(this);
+EventEmitter.call(self);
 };
 */
+
+var self;
+
 function QuesInquirer(param){
   EventEmitter.call(this);
   this.param = param;
   this.activeUsers = [];
+  //return this;
+  this.questionThreshold = nconf.get('THRESHOLD');
+  this.usersToAsk = nconf.get('NUMBER_OF_USERS_TO_ASK');
+};
+
+function create(param){
+  if(!self) {
+    self = new QuesInquirer(param);
+  }
+  return self;
 };
 
 util.inherits(QuesInquirer, EventEmitter);
 
-/**
+var getInstance = function(){
+  return self;
+};
+
+/********************************************************************************************
 * Schedules the same question to the different users until it satisfies the minimum threshold
-**/
+********************************************************************************************/
 QuesInquirer.prototype.scheduleQues = function(){
 
-  if(this.param.object1 === '' || this.param.object2 === '') {
-    this.emit('finish', '');
+  if(self.param.object1 === '' ||self.param.object2 === '') {
+    self.emit('finish', '');
     return;
   }
 
-  minUserThreshold = nconf.get('NUMBER_OF_USERS_TO_ASK');
-  console.log('scheduleQues is here baby');
+  self.minUserThreshold = nconf.get('NUMBER_OF_USERS_TO_ASK');
+  console.log('scheduleQues is here ');
   // repeat the question asking once again if there were no sufficient users at current state
-  this.emit('get_users', 'ok');
-
-  /*
-  this.intervalRoutine = setInterval(function(){
-  }, 6000);
-  */
-
-  /*
-  while(false) {
-  var userid = "hola";
-
-  // let the controller find the active users
-  this.emit('get_users');
-  if(false) this.emit('ask', 'userid');
-}
-
-if(false) this.emit('min_threshold_satisfied', userid);
-*/
+  self.emit('get_users', 'ok');
 };
 
-// find the best users
+/********************************************************************************************
+* find the best users
+********************************************************************************************/
 QuesInquirer.prototype.findBestUsers = function() {
 
-  for(var i = 0; i < minUserThreshold; i++) {
-    var randomNumber = Math.floor(Math.random() * (this.activeUsers.length - 1) + 1); // random * (high - low) + low
-    console.log("users list ->" + this.activeUsers[randomNumber]);
-    var id = this.activeUsers[randomNumber].id;
-    this.activeUsers.splice(randomNumber, 1);
-    this.emit('ask', id);
+  var waitTimeIfPitchedQuesUnanswered = 6000, waitTimeIfRanOutOfUsers = 10000;
+  //var self = self;
+  self.timedIntervalForNextSetOfUsers = setInterval(function(){
+    console.log("inside interval : " + self.minUserThreshold);
+    for(var i = 0; i < self.minUserThreshold; i++) {
+
+      if(self.activeUsers.length <= 0) {
+        clearInterval(self.timedIntervalForNextSetOfUsers);
+        self.timeoutToRepeat = setTimeout(function(){ self.scheduleQues();}, waitTimeIfRanOutOfUsers);
+        return;
+      }
+
+      console.log('___The number of active users: ' + self.activeUsers.length);
+      var randomNumber = Math.floor(Math.random() * (self.activeUsers.length - 0) + 0); // random * (high - low) + low
+      //console.log("users list ->" + self.activeUsers[randomNumber].toString());
+      var id = self.activeUsers[randomNumber].id;
+      self.activeUsers.splice(randomNumber, 1);
+      self.emit('ask', id);
+    }
+  }, waitTimeIfPitchedQuesUnanswered);
+};
+
+/********************************************************************************************
+* called when a question is answered by the user
+*********************************************************************************************/
+QuesInquirer.prototype.answerRecorded = function(){
+  console.log("______1. Here the answer is recorded_____" + self.usersToAsk + ", " + self.questionThreshold);
+  console.log("______2. Here the answer is recorded_____" + self.minUserThreshold + ", " + self.activeUsers.length);
+  self.minUserThreshold--;
+  // minimum number of users for that question is satisfied
+  if((self.usersToAsk - self.minUserThreshold) == self.questionThreshold) {
+    if(self.timeoutToRepeat) clearTimeout(self.timeoutToRepeat);
+    clearInterval(self.timedIntervalForNextSetOfUsers);
+    self.emit('min_threshold_satisfied','');
   }
 };
 
 module.exports = QuesInquirer;
+module.exports.create = create;
+module.exports.getInstance = getInstance;
