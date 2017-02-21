@@ -11,7 +11,8 @@ fs = require('fs'),
 math = require('mathjs'),
 CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
-QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js");
+QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
+async = require('async');
 
 var schema = require(__dirname + "/src/db/Schema.js"),
 CCReply = schema.CCReply,
@@ -45,28 +46,221 @@ app.get('/', function (req, res) {
   res.status(200).send('Welcome to CrowdConsensus-II with Probability!\n');
 });
 
-/**************************************
-* For initializing the SlackBot
-**************************************/
-var controller = Botkit.slackbot({
-  interactive_replies: true, // tells botkit to send button clicks into conversations
-  json_file_store: './db_slackbutton_bot/'
-  // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
-}).configureSlackApp(
-  {
-    clientId: nconf.get("CLIENT_ID"),
-    clientSecret: nconf.get("CLIENT_SECRET"),
-    scopes: ['bot']
-  }
-);
+/******************************************************************************************************
+* Save the aggregated result into CrowdConsensus module
+**************************************************************************************************/
+function crowdCollect(cb_id, callback){
+  CCReply.aggregate([
+    {
+      $group  : {
+        _id : {
+          parent_id : '$parent_id',
+          criterion : '$criterion',
+          object1 : '$object1',
+          object2 : '$object2',
+          reply : '$reply'
+        },
+        count : {$sum : 1}
+      }
+    },
+    {
+      $group : {
+        _id : {
+          criterion : '$_id.criterion',
+          parent_id : '$_id.parent_id',
+          object1 : '$_id.object1',
+          object2 : '$_id.object2'
+        },
+        total_count : { $sum : '$count' },
+        result : {
+          $push : {
+            'reply' : '$_id.reply',
+            'count' : '$count'
+          }
+        }
+      }
+    },
+    {
+      $unwind : '$result'
+    },
+    {
+      $project : {
+        _id : {
+          criterion : '$_id.criterion',
+          parent_id : '$_id.parent_id',
+          object1 : '$_id.object1',
+          object2 : '$_id.object2'
+        },
+        gt : {$cond : {if : {'$eq' : ['$result.reply', '&gt;']}, then : {'$divide' : ['$result.count', '$total_count']}, else : '0.0'}},
+        lt : {$cond : {if : {'$eq' : ['$result.reply', '&lt;']}, then : {'$divide' : ['$result.count', '$total_count']}, else : '0.0'}},
+        indiff : {$cond : {if : {'$eq' : ['$result.reply', '&#126;']}, then : {'$divide' : ['$result.count', '$total_count']}, else : '0.0'}}
+      }
+    },
+    {
+      $group  : {
+        _id : {
+          parent_id : '$_id.parent_id',
+          criterion : '$_id.criterion',
+          object1 : '$_id.object1',
+          object2 : '$_id.object2'
+        },
+        gt : {$sum : '$gt'},
+        lt : {$sum : '$lt'},
+        indiff : {$sum : '$indiff'}
+      }
+    }
+  ], function(err, result){
+    var retArr = [];
+    if(err) console.error(err);
+    else {
 
-/*
-controller.spawn({
-  token: nconf.get("BOT_ID")
-}).startRTM(function(err) {
+      //    console.log("__________replies________");
+      for(var i = 0; i < result.length; i++){
+        if(result[i]._id.parent_id != cb_id) continue;
+
+        //    console.log(JSON.stringify(result[i]));
+
+        var returnVal = {};
+        var multi = 1;
+
+        returnVal.criterion = result[i]._id.criterion;
+        returnVal.parent_id = result[i]._id.parent_id;
+        returnVal.object1 = result[i]._id.object1;
+        returnVal.object2 = result[i]._id.object2;
+        returnVal.gt = result[i].gt;
+        returnVal.lt = result[i].lt;
+        returnVal.indiff = result[i].indiff
+
+        retArr.push(returnVal);
+      }
+    }
+    callback(retArr);
+  });
+}
+
+/******************************************************************************************************
+* Update or insert into CrowdConsensus collection by aggregating 'CrowdReply' instances
+********************************************************************************************************/
+var upsert = function(oneReply, callback){
+
+  var ins = function(){
+    CCModel.update(
+      {
+        '_id' : oneReply.parent_id
+      },
+      {'$push' : {'responses' : {
+        'object1' : oneReply.object1,
+        'object2' : oneReply.object2,
+        'criterion' : oneReply.criterion,
+        'gt' : oneReply.gt,
+        'lt' : oneReply.lt,
+        'indiff' : oneReply.indiff
+      }}},
+      function(err, model){
+        if(err) console.error("Error at CCModel.update: " + err);
+        console.log('insert success ');
+
+        callback();
+      });
+    };
+
+
+    // try new method separating find and update or find and insert
+    CCModel.findOne({
+      '_id' : oneReply.parent_id,
+      'responses.object1' : oneReply.object1,
+      'responses.object2' : oneReply.object2,
+      'responses.criterion' : oneReply.criterion
+    },
+    function(err, model){
+      if(err) console.error("Error at CCModel.findOne: " + err);
+
+      if(model != null && model.length != 0){
+        // for update
+        CCModel.update(
+          {
+            'responses.object1' : oneReply.object1,
+            'responses.object2' : oneReply.object2,
+            'responses.criterion' : oneReply.criterion
+          },
+          {
+            '$pull' : {
+              'responses' : {
+                'object1' : oneReply.object1,
+                'object2' : oneReply.object2,
+                'criterion' : oneReply.criterion
+              }
+            }
+          },
+          function(err, model){
+            if(err) console.error("Error at CCModel.update: " + err);
+            console.log('remove success ' + oneReply.gt);
+            // after delete insert again
+            ins();
+          });
+        } else {
+          // for insert
+          ins();
+        }
+      });
+    }
+
+    /******************************************************************************************************
+    * Save the response from the user into the mongodb
+    **************************************************************************************************/
+    var saveInDB = function(cb_id, userId, userName, questionParam, returnedVal) {
+
+      CCReply.count({
+        'parent_id' : cb_id,
+        'object1' : questionParam.object1,
+        'object2' : questionParam.object2,
+        'criterion' : questionParam.criterion
+      }, function(err, count){
+
+        if(count <= nconf.get('THRESHOLD') - 1) {
+          var crModel = new CCReply();
+
+          crModel.parent_id = cb_id;
+          crModel.member_id = userId;
+          crModel.name = userName;
+          crModel.object1 = questionParam.object1;
+          crModel.object2 = questionParam.object2;
+          crModel.criterion = questionParam.criterion;
+          crModel.reply = returnedVal;
+
+          // save the record in mongo collection
+          crModel.save(function(err, body){
+            console.error(err);
+            console.log('the new entry is now saved in CrowdReply');
+          });
+        } else if(count >= nconf.get('THRESHOLD')) {
+          console.log("Sorry we can't update your responses into our database because we have saturated our " + nconf.get('THRESHOLD') + " limitation of responses");
+        }
+      });
+    };
+
+    /**************************************
+    * For initializing the SlackBot
+    **************************************/
+    var controller = Botkit.slackbot({
+      interactive_replies: true, // tells botkit to send button clicks into conversations
+      json_file_store: './db_slackbutton_bot/'
+      // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
+    }).configureSlackApp(
+      {
+        clientId: nconf.get("CLIENT_ID"),
+        clientSecret: nconf.get("CLIENT_SECRET"),
+        scopes: ['bot']
+      }
+    );
+
+    /*
+    controller.spawn({
+    token: nconf.get("BOT_ID")
+  }).startRTM(function(err) {
   if (err) {
-    throw new Error(err);
-  }
+  throw new Error(err);
+}
 });
 */
 
@@ -120,6 +314,12 @@ controller.storage.teams.all(function(err,teams) {
 ***/
 controller.on('interactive_message_callback', function(bot, message) {
   console.log("interactive_message_callback is received baby !");
+  var reply = {
+    text: ' ',
+    attachments: [],
+  };
+  bot.replyInteractive(message, reply);
+
 });
 
 
@@ -198,7 +398,7 @@ var lookupUserNameFromId = function(userId) {
   return userId;
 
   var members = [];
-    // previous one
+  // previous one
   for(var mem in members) {
     if(members[mem].id == userId)
     return members[mem].name;
@@ -282,7 +482,7 @@ var questionLooper = function(cb_id, bot, message){
             var username = lookupUserNameFromId(reply.user);
             console.log("The username is : " + reply.user);
             QuesInquirer.getInstance().answerRecorded();
-            //saveInDB(bot, cb_id, reply.user, username, replyParam, '&gt;', timerQues, timeoutDelay);
+            saveInDB(cb_id, reply.user, reply.user, replyParam, '&gt;');
           }
         },
         {
@@ -296,6 +496,7 @@ var questionLooper = function(cb_id, bot, message){
             console.log("The username is : " + reply.user);
             QuesInquirer.getInstance().answerRecorded();
             //saveInDB(bot, cb_id, reply.user, username, replyParam, '&lt;', timerQues, timeoutDelay);
+            saveInDB(cb_id, reply.user, reply.user, replyParam, '&lt;');
           }
         },
         {
@@ -310,6 +511,7 @@ var questionLooper = function(cb_id, bot, message){
             QuesInquirer.getInstance().answerRecorded();
             //process.exit(1);
             //saveInDB(bot, cb_id, reply.user, username, replyParam, '&#126;', timerQues, timeoutDelay);
+            saveInDB(cb_id, reply.user, reply.user, replyParam, '&#126;');
           }
         },
         {
@@ -364,8 +566,34 @@ var questionLooper = function(cb_id, bot, message){
     QuesInquirer.getInstance().removeListener('ask', askListener);
     QuesInquirer.getInstance().removeListener('min_threshold_satisfied', minThresholdSatisfiedListener);
     QuesInquirer.getInstance() == null;
-    // TODO here find a new way to schedule next question
-    questionLooper(cb_id, bot, message);
+
+    // aggregate crowd replies into CrowdConsensus collection
+    crowdCollect(cb_id, function(replyCrowdCollect){
+
+      // update the response field with the replyCrowdCollect in crowdconsensus collection
+      // using async library
+      var arr1 = [];
+      async.each(replyCrowdCollect, function(file, callback){
+        arr1.push(function(callback1){
+          upsert(file, function(){
+            callback1(null, '');
+          });
+        });
+        callback();
+      }, function(err){
+        if(err) console.error(err);
+
+        async.parallel(arr1, function(err, results){
+          if(err) console.error(err);
+
+          // now ask new question
+          //findNewQuestion(bot, cb_id, false);
+          // repeat the loop again to generate new question
+          questionLooper(cb_id, bot, message);
+          console.log("You will be asked a new question as we have the minimum number of crowdsourcers answering to the previous question");
+        });
+      });
+    });
 
   };
   QuesInquirer.getInstance().on('min_threshold_satisfied', minThresholdSatisfiedListener);
@@ -433,5 +661,12 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
     bot.reply(message, replyObj, function(err,resp) {
       console.log(err,resp);
     });
+  });
+});
+
+
+controller.hears(["gula"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  crowdCollect('58a621fbbe5761064acee0f1', function(arr){
+    console.log('crowdCollect success');
   });
 });
