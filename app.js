@@ -210,6 +210,7 @@ var lookupUserNameFromId = function(userId) {
 * Runs the algorithm to find the new question, then asks users to answer them, repeat until Pareto-Optimal objects found
 ********************************************************************************************/
 var questionLooper = function(cb_id, bot, message){
+  console.log("_____________NEW QUESTION____________");
   // run the algorithm and find the question first
 
   /* <<<<<<<  Starts Dummy question  >>>>>>>>>>>>> */
@@ -226,11 +227,11 @@ var questionLooper = function(cb_id, bot, message){
   //QuesInquirer.self = QuesInquirer.getInstance();
   //console.log("_____How is this null? _______" + QuesInquirer.self);
 
-  var quesInquirer = QuesInquirer.create(replyParam);
+  QuesInquirer.create(replyParam);
 
-  QuesInquirer.getInstance().on('ask', function(userid){
+  var askListener = function(userid){
 
-    console.log('__userid to ask question____' + userid);
+    //console.log('__userid to ask question____' + userid);
 
     bot.startPrivateConversation({user : userid}, function(err, convo){
 
@@ -322,10 +323,11 @@ var questionLooper = function(cb_id, bot, message){
         }
       ]);
     });
-  });
+  };
+  QuesInquirer.getInstance().on('ask', askListener);
 
   // find the active users list
-  quesInquirer.on('get_users', function(tmp){
+  var getUsersListener = function(tmp){
     console.log('**\n Delegated the responsibilitiy to find users to the controller \n**');
 
     bot.api.users.list({}, function(err, res){
@@ -344,21 +346,31 @@ var questionLooper = function(cb_id, bot, message){
         QuesInquirer.getInstance().findBestUsers();
       }
     });
-  });
+  };
+  QuesInquirer.getInstance().on('get_users', getUsersListener);
 
-
-  quesInquirer.on('min_threshold_satisfied', function(userid){
-    console.log('**\n Threshold of number of users to ask is reached. Time to ask new question \n**');
-    questionLooper(cb_id, bot, message);
-    QuesInquirer.getInstance() == null;
-  });
-
-  quesInquirer.on('finish', function(paretoOptimalObjects){
+  // detect when the pareto-optimal objects have been found
+  var finishListener = function(paretoOptimalObjects){
     console.log('**\n The pareto-optimal objects are found \n**');
     bot.reply(message, "You have not more questions left to answer");
-  });
+  };
+  QuesInquirer.getInstance().on('finish', finishListener);
 
-  quesInquirer.scheduleQues();
+  // detect when the minimum threshold for a particular category is satisfied
+  var minThresholdSatisfiedListener = function(userid){
+    console.log('**\n Threshold of number of users to ask is reached. Time to ask new question \n**');
+    QuesInquirer.getInstance().removeListener('finish', finishListener);
+    QuesInquirer.getInstance().removeListener('get_users', getUsersListener);
+    QuesInquirer.getInstance().removeListener('ask', askListener);
+    QuesInquirer.getInstance().removeListener('min_threshold_satisfied', minThresholdSatisfiedListener);
+    QuesInquirer.getInstance() == null;
+    // TODO here find a new way to schedule next question
+    questionLooper(cb_id, bot, message);
+
+  };
+  QuesInquirer.getInstance().on('min_threshold_satisfied', minThresholdSatisfiedListener);
+
+  QuesInquirer.getInstance().scheduleQues();
 };
 
 /************************************************************

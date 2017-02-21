@@ -54,13 +54,16 @@ QuesInquirer.prototype.scheduleQues = function(){
 ********************************************************************************************/
 QuesInquirer.prototype.findBestUsers = function() {
 
-  var waitTimeIfPitchedQuesUnanswered = 6000, waitTimeIfRanOutOfUsers = 10000;
-  //var self = self;
+  var waitTimeIfPitchedQuesUnanswered = 10000, waitTimeIfRanOutOfUsers = 12000;
+
+  var iteration = 0;
+
   self.timedIntervalForNextSetOfUsers = setInterval(function(){
-    console.log("inside interval : " + self.minUserThreshold);
+    console.log("inside interval : " + self.minUserThreshold + ", and iteration: " + iteration++);
     for(var i = 0; i < self.minUserThreshold; i++) {
 
       if(self.activeUsers.length <= 0) {
+        console.log("*** No more users left to ask. So start all over again after 10 seconds ***");
         clearInterval(self.timedIntervalForNextSetOfUsers);
         self.timeoutToRepeat = setTimeout(function(){ self.scheduleQues();}, waitTimeIfRanOutOfUsers);
         return;
@@ -85,6 +88,7 @@ QuesInquirer.prototype.answerRecorded = function(){
   self.minUserThreshold--;
   // minimum number of users for that question is satisfied
   if((self.usersToAsk - self.minUserThreshold) == self.questionThreshold) {
+    console.log("*****\n All timeouts cleared \n******");
     if(self.timeoutToRepeat) clearTimeout(self.timeoutToRepeat);
     clearInterval(self.timedIntervalForNextSetOfUsers);
     self.emit('min_threshold_satisfied','');
