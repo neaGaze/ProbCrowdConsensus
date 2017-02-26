@@ -12,7 +12,8 @@ math = require('mathjs'),
 CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
-async = require('async');
+async = require('async'),
+GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js");
 
 var schema = require(__dirname + "/src/db/Schema.js"),
 CCReply = schema.CCReply,
@@ -666,7 +667,14 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 
 
 controller.hears(["gula"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+/*
   crowdCollect('58a621fbbe5761064acee0f1', function(arr){
     console.log('crowdCollect success');
+  });
+  */
+
+  var greedy = new GreedyApproach("58a621fbbe5761064acee0f1").on("dataRetrieved", function(){
+    console.log("data retreived caught");
+    greedy.findPossibleWorlds();
   });
 });

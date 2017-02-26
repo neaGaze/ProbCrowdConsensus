@@ -41,6 +41,24 @@ var getList = function(callback){
   });
 }
 
+
+/*********************************************
+* get the list of responses to a problem
+**********************************************/
+var getResponses = function(cb_id, callback){
+  var list = {};
+  CCModel.findOne({"_id" : cb_id}, function(err, data){
+    if(err) console.error(err);
+
+    if(data != null) {
+      list.responses = data.responses;
+      list.criteria = data.criteria;
+      list.objects = data.objects
+    }
+    callback(list);
+  });
+}
+
 /**
 * Save in the CrowdConsensus collection
 **/
@@ -117,3 +135,4 @@ var findId = function(id, isFirstReply, callback){
 module.exports.getList = getList;
 module.exports.createCrowdConsensus = createCrowdConsensus;
 module.exports.findId = findId;
+module.exports.getResponses = getResponses;
