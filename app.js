@@ -676,5 +676,6 @@ controller.hears(["gula"],["direct_message","direct_mention","mention","ambient"
   var greedy = new GreedyApproach("58a621fbbe5761064acee0f1").on("dataRetrieved", function(){
     console.log("data retreived caught");
     greedy.findPossibleWorlds();
+    greedy.traverseTree();
   });
 });
