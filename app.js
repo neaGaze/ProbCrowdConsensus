@@ -34,6 +34,7 @@ mongoose.connect(mongodb_url, function (error) {
   else console.log('mongo connected');
 });
 
+var greedy;
 
 var app = express();
 
@@ -235,7 +236,8 @@ var upsert = function(oneReply, callback){
             console.log('the new entry is now saved in CrowdReply');
           });
         } else if(count >= nconf.get('THRESHOLD')) {
-          console.log("Sorry we can't update your responses into our database because we have saturated our " + nconf.get('THRESHOLD') + " limitation of responses");
+          console.log("Sorry we can't update your responses for ("+ questionParam.object1 +
+          " " + questionParam.criterion + " "+ questionParam.object2 +") into our database because we have saturated our " + nconf.get('THRESHOLD') + " limitation of responses");
         }
       });
     };
@@ -413,14 +415,9 @@ var lookupUserNameFromId = function(userId) {
 var questionLooper = function(cb_id, bot, message){
   console.log("_____________NEW QUESTION____________");
   // run the algorithm and find the question first
+  var replyParam = greedy.getNextQues();
 
-  /* <<<<<<<  Starts Dummy question  >>>>>>>>>>>>> */
-  var replyParam = {
-    object1 : 'Bond',
-    object2 : 'Hunt',
-    criterion : 'action'
-  };
-  /* <<<<<<<< Ends Dummy Question >>>>>>>>>>>>>> */
+  // console.log("-------quesReadyCallback received----------");
 
   // schedule the questions to the different users and gather their responses
   //var quesInquirer = new QuesInquirer(replyParam);
@@ -580,6 +577,7 @@ var questionLooper = function(cb_id, bot, message){
             callback1(null, '');
           });
         });
+        greedy.changeProbValues(file);
         callback();
       }, function(err){
         if(err) console.error(err);
@@ -588,10 +586,11 @@ var questionLooper = function(cb_id, bot, message){
           if(err) console.error(err);
 
           // now ask new question
-          //findNewQuestion(bot, cb_id, false);
           // repeat the loop again to generate new question
-          questionLooper(cb_id, bot, message);
           console.log("You will be asked a new question as we have the minimum number of crowdsourcers answering to the previous question");
+          greedy.traverseTree();
+          //greedy.removeListener(quesReadyCallback);
+          questionLooper(cb_id, bot, message);
         });
       });
     });
@@ -600,6 +599,15 @@ var questionLooper = function(cb_id, bot, message){
   QuesInquirer.getInstance().on('min_threshold_satisfied', minThresholdSatisfiedListener);
 
   QuesInquirer.getInstance().scheduleQues();
+
+  /* <<<<<<<  Starts Dummy question  >>>>>>>>>>>>> */
+  /*  var replyParam = {
+  object1 : 'Bond',
+  object2 : 'Hunt',
+  criterion : 'action'
+};
+*/
+/* <<<<<<<< Ends Dummy Question >>>>>>>>>>>>>> */
 };
 
 /************************************************************
@@ -621,7 +629,15 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
     var num = idFromChat[0], isFirstReply = true;
 
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
-      questionLooper(cb_id, bot, message);
+      greedy = new GreedyApproach(cb_id).on("dataRetrieved", function(){
+        console.log("data retrieved caught");
+        greedy.findPossibleWorlds();
+        questionLooper(cb_id, bot, message);
+      });
+
+      greedy.on('questionReady', function(a){
+        console.log("wtf 3");
+      });
     });
   }
 });
@@ -667,15 +683,17 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 
 
 controller.hears(["gula"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-/*
+  /*
   crowdCollect('58a621fbbe5761064acee0f1', function(arr){
-    console.log('crowdCollect success');
-  });
-  */
+  console.log('crowdCollect success');
+});
+*/
 
-  var greedy = new GreedyApproach("58a621fbbe5761064acee0f1").on("dataRetrieved", function(){
-    console.log("data retreived caught");
-    greedy.findPossibleWorlds();
-    greedy.traverseTree();
-  });
+/*
+var greedy = new GreedyApproach("58a621fbbe5761064acee0f1").on("dataRetrieved", function(){
+console.log("data retreived caught");
+greedy.findPossibleWorlds();
+greedy.traverseTree();
+});
+*/
 });

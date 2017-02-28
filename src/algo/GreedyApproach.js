@@ -4,6 +4,7 @@ Combination = require("./Combination.js"),
 //Node = require("./CombinatoryTree.js"),
 Node = require('tree-node'),
 util = require('util'),
+math = require('mathjs'),
 EventEmitter = require('events').EventEmitter;
 
 var GreedyApproach = function(cb_id)  {
@@ -234,6 +235,38 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
     });
   };
 
+  /************************************************************
+  * Get the next question
+  ***************************************************************/
+  GreedyApproach.prototype.getNextQues = function(){
+    if(this.tree) {
+
+      var startLayer = 0,
+      curNode = this.tree.getNode(0).firstChild(),
+      treeDepth = math.combinations(this.objects.length, 2) * this.criteria.length;
+
+      while(curNode.data("prob") && curNode.data("prob") > 0){
+        if(curNode.layer() == treeDepth) {
+          curNode = null;
+          break;
+        }
+        curNode = curNode.firstChild();
+      }
+
+      var param = {
+        object1 : (curNode) ? curNode.data("object1") : '',
+        object2 : (curNode) ? curNode.data("object2") : '',
+        criterion : (curNode) ? curNode.data("criterion") : ''
+      };
+
+      if(curNode)
+      console.log("The question generated is : " + curNode.data("object1") +" vs " + curNode.data("object2") + " @" + curNode.data("criterion"));
+      //this.emit('questionReady', param);
+      return param;
+    } else {
+      console.log("Oops ! The tree somehow collapsed....");
+    }
+  };
 
   /************************************************************
   * Find all the possible worlds
@@ -241,7 +274,7 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
   GreedyApproach.prototype.findPossibleWorlds = function(){
     if(!this.tree) {
       var relationships = ['gt', 'lt', 'indiff'];
-      console.log("COMO estas 2 -> " + this.objects.length);
+      // console.log("COMO estas 2 -> " + this.objects.length);
       var combn = new Combination(this.objects, this.criteria);
       var combination = combn.getCombination();
 
@@ -300,6 +333,8 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
             // change the leafNodesArr here
             leafNodesArr = newLeafNodesArr;
           }
+        } else {
+          console.log("Oops ! It seems like there already a tree so just reuse it ");
         }
 
         // now find the Pareto-Optimal Objects in every possible worlds and store at the bottommost leaf
@@ -312,9 +347,9 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         for(var id = firstDepthChildId; id <= lastDepthChildId; id++) {
           var startNode = this.tree.getNode(id);
           var aWorld = [];
-          console.log("------- POSSIBLE WORLDS ending @"+id+" ---------");
+          // console.log("------- POSSIBLE WORLDS ending @"+id+" ---------");
           while(startNode.layer() > 0) {
-            console.log("-----> " +JSON.stringify(startNode.data()));
+            // console.log("-----> " +JSON.stringify(startNode.data()));
             aWorld.push(startNode.data());
             startNode = startNode.parent;
           }
@@ -325,8 +360,8 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
 
           this.tree.getNode(id).data({POO : paretoOptimalObjs});
 
-          console.log("______ P-OPTIMAL OBJECTS for world@"+id+" _____");
-          for(var y = 0; y < paretoOptimalObjs.length; y++) console.log("pObj -> " + paretoOptimalObjs[y]);
+          // console.log("______ P-OPTIMAL OBJECTS for world@"+id+" _____");
+          // for(var y = 0; y < paretoOptimalObjs.length; y++) console.log("pObj -> " + paretoOptimalObjs[y]);
         }
         return this.tree;
       };
@@ -334,8 +369,42 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
       /************************************************************
       * Update the probability values at found set
       ***************************************************************/
-      GreedyApproach.prototype.changeProbValues = function(){
+      GreedyApproach.prototype.changeProbValues = function(param){
+        if(this.tree) {
+          var aNode = this.tree.depthFirstChild(),
+          bNode = this.tree.depthLastChild();
 
+          while(aNode.layer() != 0) {
+
+            if((aNode.data("object1") == param.object1 &&
+            aNode.data("object2") == param.object2 &&
+            aNode.data("criterion") == param.criterion) ||
+            (aNode.data("object2") == param.object1 &&
+            aNode.data("object1") == param.object2 &&
+            aNode.data("criterion") == param.criterion)) {
+              console.log("OK our node found");
+              break;
+            }
+
+            console.log("layer -> " + aNode.layer() +", obj1 -> " +aNode.data("object1") +
+            ", object2 -> " + aNode.data("object2") + " vs param.obj1 -> " + param.object1 + " param.obj2 -> " + param.object2);
+
+            aNode = aNode.parent;
+            bNode = bNode.parent;
+          }
+
+          console.log("-------UPDATE PROB VALUES IN TREE-------");
+          // now change the prob of all the nodes in the layers between aNode and bNode
+          for(var i = aNode.id; i <= bNode.id; i++) {
+            var cNode = this.tree.getNode(i);
+            if(cNode.data("sign") == "gt") cNode.data({prob : param.gt});
+            else if(cNode.data("sign") == "lt") cNode.data({prob : param.lt});
+            else if(cNode.data("sign") == "indiff") cNode.data({prob : param.indiff});
+
+            console.log("node in layer "+cNode.layer()+" and id_" + i +"-> " + cNode.data("prob"));
+          }
+          console.log("-------------------------------");
+        }
       }
 
 
@@ -364,26 +433,26 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         }
 
         for(var id = firstDepthChildId; id <= lastDepthChildId; id++) {
-            var lfNode = this.tree.getNode(id),
-            pObjs = lfNode.data("POO");
+          var lfNode = this.tree.getNode(id),
+          pObjs = lfNode.data("POO");
 
-            if(!pObjs) console.log("Sorry it seems that pareto-optimal objects were not stored at the leaf Nodes");
-            else {
-              if(pObjs.length == 0) ranks["undefined"] += ((1/childCount) * (totalProb));
+          if(!pObjs) console.log("Sorry it seems that pareto-optimal objects were not stored at the leaf Nodes");
+          else {
+            if(pObjs.length == 0) ranks["undefined"] += ((1/childCount) * (totalProb));
 
-              for(var i = 0; i < pObjs.length; i++) {
-                ranks[pObjs[i]] += ((1/childCount) * totalProb);
-                console.log("pObjs @" + id+" -> " + pObjs[i]);
-              }
-              console.log("For id -> " + id + " ranks : " + JSON.stringify(ranks));
+            for(var i = 0; i < pObjs.length; i++) {
+              ranks[pObjs[i]] += ((1/childCount) * totalProb);
+              // console.log("pObjs @" + id+" -> " + pObjs[i]);
             }
+            // console.log("For id -> " + id + " ranks : " + JSON.stringify(ranks));
+          }
 
           // read or generate the pareto-optimal objects by bottom-up traversal
-      /*    if(id % 3 == 0) ranks["James"] += ((1/9) * (totalProb));
+          /*    if(id % 3 == 0) ranks["James"] += ((1/9) * (totalProb));
           else if(id % 5 == 0) ranks["Mark"] += ((1/9) * (totalProb));
           else if(id % 7 == 0) ranks["David"] += ((1/9) * (totalProb));
           else ranks["undefined"] += ((1/9) * (totalProb));
-      */
+          */
         }
 
         return ranks;
@@ -407,6 +476,10 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
           lastChild = lastChild.lastChild();
         }
 
+        if(!firstChild)
+        console.log("firstChild is null");
+        else console.log("prob -> "+firstChild.data("prob"));
+
         // initialize the ranks object
         var ranks = {'undefined' : 0};
         for(var key = 0; key < this.objects.length; key++) {
@@ -414,20 +487,20 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         }
 
         // find all the siblings of currentChild
-        console.log("-------- INDIVIDUAL RANKS ---------");
+        // console.log("-------- INDIVIDUAL RANKS ---------");
         for(var id = currFirstChild.id; id <= currLastChild.id; id++) {
           var base = this.tree.getNode(id);
           var newRank = GreedyApproach.prototype.findRanking.call(this, base);
           for(var key in ranks) {
             ranks[key] += newRank[key];
-          console.log("Ranks for id " + id + " -> " + newRank[key]);
+            // console.log("Ranks for id " + id + " -> " + newRank[key]);
           }
-          console.log("-------------------------");
+          // console.log("-------------------------");
         }
 
         console.log("------------ RANKS --------------");
         console.log(JSON.stringify(ranks));
-        process.exit(1);
+        //process.exit(1);
       }
 
 
