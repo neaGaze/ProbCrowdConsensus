@@ -39,7 +39,6 @@ var isInverseOf = function(sign1, sign2){
 GreedyApproach.prototype.findParetoOptimalObjects = function(){
   var pObj = [];
   this.objDominanceCounter  = {};
-  var objCounter = 0;
 
   // initialization loop with total object counter
   for(var i = 0; i < this.paretoOptimalCand.length; i++){
@@ -50,9 +49,8 @@ GreedyApproach.prototype.findParetoOptimalObjects = function(){
     if(!(this.paretoOptimalCand[i].object1 in this.objDominanceCounter)){
       this.objDominanceCounter[this.paretoOptimalCand[i].object1] = {
         count : 0,
-        isValid : false
+        isValid : 0
       };
-      objCounter += 1;
     }
 
     // there are only 2 cases left in object2: "the right side of >" or "The right side of ~".
@@ -61,10 +59,9 @@ GreedyApproach.prototype.findParetoOptimalObjects = function(){
       if(sign == "&#126;") {
         this.objDominanceCounter[this.paretoOptimalCand[i].object2] = {
           count : 0,
-          isValid : false
+          isValid : 0
         };
       }
-      objCounter += 1;
     }
   }
 
@@ -80,18 +77,27 @@ GreedyApproach.prototype.findParetoOptimalObjects = function(){
       this.objDominanceCounter[this.paretoOptimalCand[i].object1].count += 1;
 
       // this finds the pareto-optimal object if the dominated object count is 1 less than the total objects found
-      if(this.paretoOptimalCand[i].sign == "&gt;")
-      this.objDominanceCounter[this.paretoOptimalCand[i].object1].isValid = true;
+      if((this.paretoOptimalCand[i].sign == "&gt;") && (this.objDominanceCounter[this.paretoOptimalCand[i].object1].isValid >= 0)){
+        this.objDominanceCounter[this.paretoOptimalCand[i].object1].isValid = 1;
+      }
 
       // -1 because we don't consider itself
       if(this.objDominanceCounter[this.paretoOptimalCand[i].object1].count == (this.objects.length - 1) &&
-      this.objDominanceCounter[this.paretoOptimalCand[i].object1].isValid)
+      this.objDominanceCounter[this.paretoOptimalCand[i].object1].isValid > 0)
       pObj.push(this.paretoOptimalCand[i].object1);
     }
 
     // for the second object a.k.a the dominated object
-    if(this.paretoOptimalCand[i].object2 in this.objDominanceCounter)
-    this.objDominanceCounter[this.paretoOptimalCand[i].object2].count += 1;
+    if(this.paretoOptimalCand[i].object2 in this.objDominanceCounter) {
+      this.objDominanceCounter[this.paretoOptimalCand[i].object2].count += 1;
+
+      if(this.paretoOptimalCand[i].sign == "&gt;")
+      this.objDominanceCounter[this.paretoOptimalCand[i].object2].isValid = -1;
+
+      if(this.objDominanceCounter[this.paretoOptimalCand[i].object2].count == (this.objects.length - 1) &&
+      this.objDominanceCounter[this.paretoOptimalCand[i].object2].isValid > 0)
+      pObj.push(this.paretoOptimalCand[i].object2);
+    }
   }
 
   return pObj;
@@ -168,7 +174,7 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         var dominatedObj = splited[1], dominatingObj = splited[0];
 
         // for '<' case
-        if(dominanceCountDict[realKey].sign == "&lt;" || ("&lt".indexOf(dominanceCountDict[realKey].sign) > -1)){
+        if(dominanceCountDict[realKey].sign == "&lt;" || ("&lt;".indexOf(dominanceCountDict[realKey].sign) > -1)){
           dominatedObj = splited[0];
           dominatingObj = splited[1];
         }
@@ -306,10 +312,13 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         for(var id = firstDepthChildId; id <= lastDepthChildId; id++) {
           var startNode = this.tree.getNode(id);
           var aWorld = [];
+          console.log("------- POSSIBLE WORLDS ending @"+id+" ---------");
           while(startNode.layer() > 0) {
+            console.log("-----> " +JSON.stringify(startNode.data()));
             aWorld.push(startNode.data());
             startNode = startNode.parent;
           }
+
 
           // now find the pareto_Optimal objects here
           var paretoOptimalObjs = GreedyApproach.prototype.getParetoOptimalObjs.call(this, aWorld);
@@ -360,11 +369,13 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
 
             if(!pObjs) console.log("Sorry it seems that pareto-optimal objects were not stored at the leaf Nodes");
             else {
-              if(pObjs.length == 0) ranks["undefined"] += ((1/9) * (totalProb));
+              if(pObjs.length == 0) ranks["undefined"] += ((1/childCount) * (totalProb));
 
               for(var i = 0; i < pObjs.length; i++) {
-                ranks[pObjs[i]] += ((1/9) * totalProb);
+                ranks[pObjs[i]] += ((1/childCount) * totalProb);
+                console.log("pObjs @" + id+" -> " + pObjs[i]);
               }
+              console.log("For id -> " + id + " ranks : " + JSON.stringify(ranks));
             }
 
           // read or generate the pareto-optimal objects by bottom-up traversal
@@ -403,12 +414,15 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         }
 
         // find all the siblings of currentChild
+        console.log("-------- INDIVIDUAL RANKS ---------");
         for(var id = currFirstChild.id; id <= currLastChild.id; id++) {
           var base = this.tree.getNode(id);
           var newRank = GreedyApproach.prototype.findRanking.call(this, base);
           for(var key in ranks) {
             ranks[key] += newRank[key];
+          console.log("Ranks for id " + id + " -> " + newRank[key]);
           }
+          console.log("-------------------------");
         }
 
         console.log("------------ RANKS --------------");
