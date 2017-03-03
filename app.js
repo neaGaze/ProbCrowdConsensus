@@ -35,6 +35,7 @@ mongoose.connect(mongodb_url, function (error) {
 });
 
 var greedy;
+var startTime, endTime;
 
 var app = express();
 
@@ -120,7 +121,7 @@ function crowdCollect(cb_id, callback){
       for(var i = 0; i < result.length; i++){
         if(result[i]._id.parent_id != cb_id) continue;
 
-        //    console.log(JSON.stringify(result[i]));
+            //console.log(JSON.stringify(result[i]));
 
         var returnVal = {};
         var multi = 1;
@@ -577,6 +578,8 @@ var questionLooper = function(cb_id, bot, message){
             callback1(null, '');
           });
         });
+        console.log("---------NEW PROB VALUES_______");
+        console.log(JSON.stringify(file));
         greedy.changeProbValues(file);
         callback();
       }, function(err){
@@ -585,11 +588,11 @@ var questionLooper = function(cb_id, bot, message){
         async.parallel(arr1, function(err, results){
           if(err) console.error(err);
 
+        console.log(" results -> " + JSON.stringify(results));
           // now ask new question
           // repeat the loop again to generate new question
           console.log("You will be asked a new question as we have the minimum number of crowdsourcers answering to the previous question");
           greedy.traverseTree();
-          //greedy.removeListener(quesReadyCallback);
           questionLooper(cb_id, bot, message);
         });
       });
@@ -682,18 +685,21 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 });
 
 
-controller.hears(["gula"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-  /*
+controller.hears(["run"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+/*
   crowdCollect('58a621fbbe5761064acee0f1', function(arr){
   console.log('crowdCollect success');
 });
 */
 
-/*
-var greedy = new GreedyApproach("58a621fbbe5761064acee0f1").on("dataRetrieved", function(){
+
+var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
 console.log("data retreived caught");
+startTime = new Date().getTime();
 greedy.findPossibleWorlds();
 greedy.traverseTree();
+endTime = new Date().getTime();
+console.log("---------------This execution takes " + ((endTime - startTime) / 1000) + " secs to run-----------");
 });
-*/
+
 });

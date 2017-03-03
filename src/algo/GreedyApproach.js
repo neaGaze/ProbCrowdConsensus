@@ -323,10 +323,10 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
                   if(relationships[reln] == 'indiff') node.data({prob : indiff});
                 } else node.data({prob : -1.0});
 
-                //console.log("leafPos -> " + leafNodesArr[pos] + ", id -> " + node.id);
-                //console.log("position -> "+node.position() + " and layer -> " + node.layer());
+                console.log("leafPos -> " + leafNodesArr[pos] + ", id -> " + node.id);
+                console.log("position -> "+node.position() + " and layer -> " + node.layer());
                 newLeafNodesArr.push(node.id);
-                //console.log("<<<<<<<< The child node is : " + JSON.stringify(node.data()) + " >>>>>>>>>>>>");
+                console.log("<<<<<<<< The child node is : " + JSON.stringify(node.data()) + " >>>>>>>>>>>>");
               }
             }
 
@@ -386,8 +386,9 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
               break;
             }
 
-            console.log("layer -> " + aNode.layer() +", obj1 -> " +aNode.data("object1") +
-            ", object2 -> " + aNode.data("object2") + " vs param.obj1 -> " + param.object1 + " param.obj2 -> " + param.object2);
+            console.log("layer -> " + aNode.layer() +", node -> (" +aNode.data("object1") +
+            " "+aNode.data("sign") + " " + aNode.data("object2") + ") vs param -> (" +
+             param.object1 + " *" + param.gt+", " + param.lt+", " +param.indiff + "* " + param.object2+")");
 
             aNode = aNode.parent;
             bNode = bNode.parent;
@@ -403,7 +404,7 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
 
             console.log("node in layer "+cNode.layer()+" and id_" + i +"-> " + cNode.data("prob"));
           }
-          console.log("-------------------------------");
+          console.log("-------------------------------\n");
         }
       }
 
@@ -487,15 +488,15 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
         }
 
         // find all the siblings of currentChild
-        // console.log("-------- INDIVIDUAL RANKS ---------");
+         console.log("-------- INDIVIDUAL RANKS ---------");
         for(var id = currFirstChild.id; id <= currLastChild.id; id++) {
           var base = this.tree.getNode(id);
           var newRank = GreedyApproach.prototype.findRanking.call(this, base);
           for(var key in ranks) {
             ranks[key] += newRank[key];
-            // console.log("Ranks for id " + id + " -> " + newRank[key]);
+             console.log("Ranks for id " + id + " -> " + newRank[key]);
           }
-          // console.log("-------------------------");
+           console.log("-------------------------");
         }
 
         console.log("------------ RANKS --------------");
