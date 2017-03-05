@@ -356,9 +356,9 @@ GreedyApproach.prototype.getParetoOptimalObjs = function(objArr) {
 
 
           // now find the pareto_Optimal objects here
-          var paretoOptimalObjs = GreedyApproach.prototype.getParetoOptimalObjs.call(this, aWorld);
+          //var paretoOptimalObjs = GreedyApproach.prototype.getParetoOptimalObjs.call(this, aWorld);
 
-          this.tree.getNode(id).data({POO : paretoOptimalObjs});
+          // this.tree.getNode(id).data({POO : paretoOptimalObjs});
 
           // console.log("______ P-OPTIMAL OBJECTS for world@"+id+" _____");
           // for(var y = 0; y < paretoOptimalObjs.length; y++) console.log("pObj -> " + paretoOptimalObjs[y]);

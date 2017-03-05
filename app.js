@@ -14,6 +14,7 @@ CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
 async = require('async'),
 GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js");
+GreedyArray = require(__dirname + "/src/algo/GreedyArray.js");
 
 var schema = require(__dirname + "/src/db/Schema.js"),
 CCReply = schema.CCReply,
@@ -696,8 +697,15 @@ controller.hears(["run"],["direct_message","direct_mention","mention","ambient"]
 var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
 console.log("data retreived caught");
 startTime = new Date().getTime();
-greedy.findPossibleWorlds();
-greedy.traverseTree();
+//greedy.findPossibleWorlds();
+//greedy.traverseTree();
+
+var gree = new GreedyArray();
+/*
+var cnt = 0;
+for(var t = 0; t < 3486784401; t++) cnt++;
+console.log("print: "+cnt);
+*/
 endTime = new Date().getTime();
 console.log("---------------This execution takes " + ((endTime - startTime) / 1000) + " secs to run-----------");
 });
