@@ -707,7 +707,22 @@ for(var t = 0; t < 3486784401; t++) cnt++;
 console.log("print: "+cnt);
 */
 endTime = new Date().getTime();
-console.log("---------------This execution takes " + ((endTime - startTime) / 1000) + " secs to run-----------");
+console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
+process.exit(1);
 });
 
 });
+
+startTime = new Date().getTime();
+//greedy.findPossibleWorlds();
+//greedy.traverseTree();
+
+var gree = new GreedyArray();
+/*
+var cnt = 0;
+for(var t = 0; t < 3486784401; t++) cnt++;
+console.log("print: "+cnt);
+*/
+endTime = new Date().getTime();
+console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
+process.exit(1);
