@@ -63,7 +63,7 @@ QuesInquirer.prototype.findBestUsers = function() {
     for(var i = 0; i < self.minUserThreshold; i++) {
 
       if(self.activeUsers.length <= 0) {
-        console.log("*** No more users left to ask. So start all over again after 10 seconds ***");
+        console.log("*** No more users left to ask. So start all over again after "+(waitTimeIfRanOutOfUsers % 1000)+" seconds ***");
         clearInterval(self.timedIntervalForNextSetOfUsers);
         self.timeoutToRepeat = setTimeout(function(){ self.scheduleQues();}, waitTimeIfRanOutOfUsers);
         return;
@@ -83,8 +83,7 @@ QuesInquirer.prototype.findBestUsers = function() {
 * called when a question is answered by the user
 *********************************************************************************************/
 QuesInquirer.prototype.answerRecorded = function(){
-  console.log("______1. Here the answer is recorded_____" + self.usersToAsk + ", " + self.questionThreshold);
-  console.log("______2. Here the answer is recorded_____" + self.minUserThreshold + ", " + self.activeUsers.length);
+  console.log("______1. Here the answer is recorded_____" + self.usersToAsk + ", " + self.questionThreshold+ ", "+self.minUserThreshold + ", " + self.activeUsers.length);
   self.minUserThreshold--;
   // minimum number of users for that question is satisfied
   if((self.usersToAsk - self.minUserThreshold) == self.questionThreshold) {

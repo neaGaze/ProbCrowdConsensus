@@ -4,17 +4,10 @@ math = require('mathjs'),
 fs = require('fs'),
 util = require('util'),
 Combination = require("./Combination.js");
-/*
-var log_file = fs.createWriteStream('../../testcases/debug.log', {flags : 'w'});
-var log_stdout = process.stdout;
 
-console.log = function(d) { //
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
-};
-*/
 
 var ENABLE_LOGGING = false;
+
 /**
 * Get Inverse of the sign
 **/
@@ -25,7 +18,7 @@ var isInverseOf = function(sign1, sign2){
   else false;
 }
 
-var findPOptimal = function(world, paretoOptimalCand, objects, criteria){
+var findPOptimal = function(paretoOptimalCand, objects, criteria){
   var pObj = [];
   var objDominanceCounter  = {};
 
@@ -43,74 +36,12 @@ var findPOptimal = function(world, paretoOptimalCand, objects, criteria){
     }
   }
   return pObj;
-
-  // initialization loop with total object counter
-  for(var i = 0; i < paretoOptimalCand.length; i++){
-    var sign = paretoOptimalCand[i].sign;
-
-    // we always consider the object1 as possible candidate because the sign is always either > or ~
-    if(!(paretoOptimalCand[i].object1 in objDominanceCounter)){
-      objDominanceCounter[paretoOptimalCand[i].object1] = {
-        count : 0,
-        isValid : 0
-      };
-    }
-
-    // there are only 2 cases left in object2: "the right side of >" or "The right side of ~".
-    // Ignore if it's "the right side of >" aka the dominated object, because it will never be pareto-optimal
-    if(!(paretoOptimalCand[i].object2 in objDominanceCounter)){
-      if(sign == "indiff") {
-        objDominanceCounter[paretoOptimalCand[i].object2] = {
-          count : 0,
-          isValid : 0
-        };
-      }
-    }
-  }
-
-  if(ENABLE_LOGGING) console.log("_____________________Pareto-Optimal Candidate objects________________________");
-
-  // loop for finding Pareto-Optimal objects
-  for(var i = 0; i < paretoOptimalCand.length; i++){
-
-    if(ENABLE_LOGGING) console.log(""+paretoOptimalCand[i].object1 + " " + paretoOptimalCand[i].sign +" "+paretoOptimalCand[i].object2);
-
-    // for the first object a.k.a the dominating object
-    if(paretoOptimalCand[i].object1 in objDominanceCounter) {
-      objDominanceCounter[paretoOptimalCand[i].object1].count += 1;
-
-      // this finds the pareto-optimal object if the dominated object count is 1 less than the total objects found
-      if((paretoOptimalCand[i].sign == "gt") /* && (objDominanceCounter[paretoOptimalCand[i].object1].isValid >= 0) */){
-        objDominanceCounter[paretoOptimalCand[i].object1].isValid = 1;
-      }
-
-      // -1 because we don't consider itself
-      if(objDominanceCounter[paretoOptimalCand[i].object1].count == (objects.length - 1) &&
-      objDominanceCounter[paretoOptimalCand[i].object1].isValid > 0)
-      pObj.push(paretoOptimalCand[i].object1);
-    }
-
-    // for the second object a.k.a the dominated object
-    if(paretoOptimalCand[i].object2 in objDominanceCounter) {
-      objDominanceCounter[paretoOptimalCand[i].object2].count += 1;
-      /*
-      if(paretoOptimalCand[i].sign == "gt")
-      objDominanceCounter[paretoOptimalCand[i].object2].isValid = -1;
-
-      if(objDominanceCounter[paretoOptimalCand[i].object2].count == (objects.length - 1) &&
-      objDominanceCounter[paretoOptimalCand[i].object2].isValid > 0)
-      pObj.push(paretoOptimalCand[i].object2);
-      */
-    }
-  }
-
-  return pObj;
 }
 
 
 var GreedyArray = function(){
 
-  var objects = ['Apple','Dell','HP'], criteria = ['design', 'performance'];
+  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance'];
   var combn = new Combination(objects, criteria);
   var combination = combn.getCombination();
   var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], combination.length);
@@ -119,7 +50,41 @@ var GreedyArray = function(){
   var knownRes = [
     {
       'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'design', 'gt' : 0.5, 'lt' : 0.5, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'performance', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.8, 'lt' : 0.2, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.0, 'indiff' : 1.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.6, 'lt' : 0.0, 'indiff' : 0.4
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.8, 'lt' : 0.0, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.2, 'lt' : 0.2, 'indiff' : 0.6
+    },
+    {
+      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.8, 'indiff' : 0.2
     }
+
   ];
 
   var dict = {}, pos = [];
@@ -140,17 +105,18 @@ var GreedyArray = function(){
     console.log("------------------------------------");
     console.log("Total number of Possible World = " + baseN.length+"\n");
     console.log("--------------------- "+knownRes.length+" Inputs provided---------------------------");
-    for(var kr = 0; kr < knownRes.length; kr++) console.log(knownRes[kr].object1+", "+knownRes[kr].object2+", "+
+    var kr = knownRes.length - 1;//for(var kr = 0; kr < knownRes.length; kr++)
+     console.log(knownRes[kr].object1+", "+knownRes[kr].object2+", "+
     knownRes[kr].criterion+", "+knownRes[kr].gt+", "+knownRes[kr].indiff+", "+knownRes[kr].lt + "\n");
     //console.log("------------------------------------\n");
-var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
+var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0, "Toshiba" : 0};
     baseN.forEach(function(a){
       //  console.log(a);
       var world = [];
       var dominanceCountDict = {}, paretoOptimalCand = [];
 
       var divi = (math.pow(3, knownRes.length)) / (baseN.length);
-      var key = "", prob = 1.0
+      var key = "", prob = 1.0;
 
       for(var al = 0; al < a.length; al++) {
         var w = {
@@ -279,7 +245,7 @@ var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
         if(ENABLE_LOGGING) console.log("dominanceCountDict : " + JSON.stringify(dominanceCountDict));
 
         worlds.push(world);
-        var pObjs = findPOptimal(world, paretoOptimalCand, objects, criteria);
+        var pObjs = findPOptimal(paretoOptimalCand, objects, criteria);
 
         // find the probability of p-optimal object
         if(!dict[key]) {
@@ -290,13 +256,13 @@ var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
 
         for(var m = 0; m < pObjs.length; m++) {
           if(ENABLE_LOGGING) console.log("pObjs : " + m + " -> " +pObjs[m] + " = " + dict[key][pObjs[m]] + " + (" + prob + " * " + divi+")");
-          dict[key][pObjs[m]] += (prob * divi);
+          dict[key][pObjs[m]] += (math.exp(math.log(prob) + math.log(divi))); //(prob * divi);
           counter[pObjs[m]] += 1;
         }
 
         if(pObjs.length == 0) {
           if(ENABLE_LOGGING) console.log("no pareto optimal objects");
-          dict[key].undefined += (prob * divi);
+          dict[key].undefined += (math.exp(math.log(prob) + math.log(divi))); //(prob * divi);
           counter['undefined'] += 1;
         }
 
@@ -305,12 +271,12 @@ var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
           if(r == (pObjs.length - 1)) tmpStr += (pObjs[r]);
           else tmpStr += (pObjs[r]+",");
         }
-        console.log("----------------- World "+(count)+":"+ (math.round((prob * divi), 3)) + ", "+ tmpStr+ " -----------------");
+      //  console.log("----------------- World "+(count)+":"+ (math.round((prob * divi), 3)) + ", "+ tmpStr+ " -----------------");
         for(var al = 0; al < a.length; al++) {
           var tmpSign = "<";
           if(a[al] == "gt") tmpSign = ">"; else if(a[al] == "lt") tmpSign = "<"; else tmpSign = "~";
 
-          console.log(""+combination[al].object1 +", " + combination[al].object2 + ", " + combination[al].criterion+", " + tmpSign +"");
+    //      console.log(""+combination[al].object1 +", " + combination[al].object2 + ", " + combination[al].criterion+", " + tmpSign +"");
         }
 
         count++;
@@ -323,8 +289,8 @@ var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
         var indiRank = dict[each];
         for(var ke in indiRank) {
           if(!ranks[ke]) {
-            ranks[ke] = math.round(indiRank[ke], 3);
-          } else ranks[ke] += math.round(indiRank[ke], 3);
+            ranks[ke] = indiRank[ke]; // previously this was rounded off to 3 digits
+          } else ranks[ke] += indiRank[ke];
         }
       }
 
@@ -332,7 +298,7 @@ var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0};
 
       var tmprank = "";
       for(var ey in ranks) {
-        tmprank += ("'" + ey + "': " + "'" +ranks[ey] + "', ");
+        tmprank += ("'" + ey + "': " + "'" + math.round(ranks[ey], 4) + "', ");
       }
       tmprank = tmprank.substring(0, tmprank.length - 1);
       console.log("\n" + tmprank + "\n");

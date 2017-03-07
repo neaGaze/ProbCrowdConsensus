@@ -419,18 +419,9 @@ var questionLooper = function(cb_id, bot, message){
   // run the algorithm and find the question first
   var replyParam = greedy.getNextQues();
 
-  // console.log("-------quesReadyCallback received----------");
-
-  // schedule the questions to the different users and gather their responses
-  //var quesInquirer = new QuesInquirer(replyParam);
-  //QuesInquirer.create(replyParam);
-  //QuesInquirer.self = QuesInquirer.getInstance();
-  //console.log("_____How is this null? _______" + QuesInquirer.self);
-
   QuesInquirer.create(replyParam);
 
   var askListener = function(userid){
-
     //console.log('__userid to ask question____' + userid);
 
     bot.startPrivateConversation({user : userid}, function(err, convo){
@@ -495,7 +486,6 @@ var questionLooper = function(cb_id, bot, message){
             var username = lookupUserNameFromId(reply.user);
             console.log("The username is : " + reply.user);
             QuesInquirer.getInstance().answerRecorded();
-            //saveInDB(bot, cb_id, reply.user, username, replyParam, '&lt;', timerQues, timeoutDelay);
             saveInDB(cb_id, reply.user, reply.user, replyParam, '&lt;');
           }
         },
@@ -509,8 +499,6 @@ var questionLooper = function(cb_id, bot, message){
             var username = lookupUserNameFromId(reply.user);
             console.log("The username is : " + reply.user);
             QuesInquirer.getInstance().answerRecorded();
-            //process.exit(1);
-            //saveInDB(bot, cb_id, reply.user, username, replyParam, '&#126;', timerQues, timeoutDelay);
             saveInDB(cb_id, reply.user, reply.user, replyParam, '&#126;');
           }
         },
@@ -530,7 +518,7 @@ var questionLooper = function(cb_id, bot, message){
 
   // find the active users list
   var getUsersListener = function(tmp){
-    console.log('**\n Delegated the responsibilitiy to find users to the controller \n**');
+    console.log('**\n Delegated the responsibility to find users to the controller \n**');
 
     bot.api.users.list({}, function(err, res){
       if(err) {
@@ -635,7 +623,8 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
       greedy = new GreedyApproach(cb_id).on("dataRetrieved", function(){
         console.log("data retrieved caught");
-        greedy.findPossibleWorlds();
+        //greedy.findPossibleWorlds();
+        greedy.greedyArray();
         questionLooper(cb_id, bot, message);
       });
 
@@ -718,11 +707,7 @@ startTime = new Date().getTime();
 //greedy.traverseTree();
 
 var gree = new GreedyArray();
-/*
-var cnt = 0;
-for(var t = 0; t < 3486784401; t++) cnt++;
-console.log("print: "+cnt);
-*/
+
 endTime = new Date().getTime();
 console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
 process.exit(1);
