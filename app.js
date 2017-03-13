@@ -706,8 +706,35 @@ startTime = new Date().getTime();
 //greedy.findPossibleWorlds();
 //greedy.traverseTree();
 
-var gree = new GreedyArray();
+var gree = new GreedyArray(process.env.START_INDEX);
 
+/*
+
+  console.log("length : " +baseN.length);
+  var cnt = 0, num = 3;//348678440000000;
+
+  console.log("elem at "+num+": "+baseN.nth(num));
+  console.log("elem at "+num+": "+baseN.nth(1));
+*/
+
+/*
+var Combinatorics = require('js-combinatorics');
+var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], 18);
+var crt = 0;
+var str = "";
+for(var k = 0; k < baseN.length; k++) {
+  str += (baseN.nth(k) + "\n");
+  crt++;
+  if(crt % 1000000 == 0) {
+    var wstream = fs.createWriteStream('worlds.dat', { 'flags': 'a', 'encoding': null, 'mode': 0666});
+    wstream.write(str);
+    wstream.end();
+    console.log(crt);
+    str = "";
+    if((crt / 1000000) > 3) break;
+  }
+}
+*/
 endTime = new Date().getTime();
 console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
-process.exit(1);
+//process.exit(1);
