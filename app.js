@@ -122,7 +122,7 @@ function crowdCollect(cb_id, callback){
       for(var i = 0; i < result.length; i++){
         if(result[i]._id.parent_id != cb_id) continue;
 
-            //console.log(JSON.stringify(result[i]));
+        //console.log(JSON.stringify(result[i]));
 
         var returnVal = {};
         var multi = 1;
@@ -577,7 +577,7 @@ var questionLooper = function(cb_id, bot, message){
         async.parallel(arr1, function(err, results){
           if(err) console.error(err);
 
-        console.log(" results -> " + JSON.stringify(results));
+          console.log(" results -> " + JSON.stringify(results));
           // now ask new question
           // repeat the loop again to generate new question
           console.log("You will be asked a new question as we have the minimum number of crowdsourcers answering to the previous question");
@@ -676,7 +676,7 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 
 
 controller.hears(["run"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-/*
+  /*
   crowdCollect('58a621fbbe5761064acee0f1', function(arr){
   console.log('crowdCollect success');
 });
@@ -684,20 +684,20 @@ controller.hears(["run"],["direct_message","direct_mention","mention","ambient"]
 
 
 var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
-console.log("data retreived caught");
-startTime = new Date().getTime();
-//greedy.findPossibleWorlds();
-//greedy.traverseTree();
+  console.log("data retreived caught");
+  startTime = new Date().getTime();
+  //greedy.findPossibleWorlds();
+  //greedy.traverseTree();
 
-var gree = new GreedyArray();
-/*
-var cnt = 0;
-for(var t = 0; t < 3486784401; t++) cnt++;
-console.log("print: "+cnt);
-*/
-endTime = new Date().getTime();
-console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
-process.exit(1);
+  var gree = new GreedyArray();
+  /*
+  var cnt = 0;
+  for(var t = 0; t < 3486784401; t++) cnt++;
+  console.log("print: "+cnt);
+  */
+  endTime = new Date().getTime();
+  console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
+  process.exit(1);
 });
 
 });
@@ -708,13 +708,14 @@ startTime = new Date().getTime();
 
 var gree = new GreedyArray(process.env.START_INDEX);
 
+
 /*
 
-  console.log("length : " +baseN.length);
-  var cnt = 0, num = 3;//348678440000000;
+console.log("length : " +baseN.length);
+var cnt = 0, num = 3;//348678440000000;
 
-  console.log("elem at "+num+": "+baseN.nth(num));
-  console.log("elem at "+num+": "+baseN.nth(1));
+console.log("elem at "+num+": "+baseN.nth(num));
+console.log("elem at "+num+": "+baseN.nth(1));
 */
 
 /*
@@ -723,18 +724,28 @@ var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], 18);
 var crt = 0;
 var str = "";
 for(var k = 0; k < baseN.length; k++) {
-  str += (baseN.nth(k) + "\n");
-  crt++;
-  if(crt % 1000000 == 0) {
-    var wstream = fs.createWriteStream('worlds.dat', { 'flags': 'a', 'encoding': null, 'mode': 0666});
-    wstream.write(str);
-    wstream.end();
-    console.log(crt);
-    str = "";
-    if((crt / 1000000) > 3) break;
-  }
+str += (baseN.nth(k) + "\n");
+crt++;
+if(crt % 1000000 == 0) {
+var wstream = fs.createWriteStream('worlds.dat', { 'flags': 'a', 'encoding': null, 'mode': 0666});
+wstream.write(str);
+wstream.end();
+console.log(crt);
+str = "";
+if((crt / 1000000) > 3) break;
+}
 }
 */
 endTime = new Date().getTime();
 console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
+
+var pastTime = 0;
+if(fs.existsSync('timemachine.txt')) {
+  var pastTimeStr = fs.readFileSync('timemachine.txt');
+  pastTime = Number(pastTimeStr);
+}
+var wstream = fs.createWriteStream("timemachine.txt", {'flags': 'w', 'encoding': null, 'mode': 0666});
+var writeVal = pastTime + ((endTime - startTime) / 1000);
+wstream.write(writeVal+"");
+wstream.end();
 //process.exit(1);

@@ -73,6 +73,39 @@ var GreedyArray = function(startIndex){
   var knownRes = [
     {
       'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'design', 'gt' : 0.5, 'lt' : 0.5, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'performance', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.8, 'lt' : 0.2, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.0, 'indiff' : 1.0
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.6, 'lt' : 0.0, 'indiff' : 0.4
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.8, 'lt' : 0.0, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
+    },
+    {
+      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
+    },
+    {
+      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.2, 'lt' : 0.2, 'indiff' : 0.6
+    },
+    {
+      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.8, 'indiff' : 0.2
     }
   ];
 
@@ -99,18 +132,25 @@ var GreedyArray = function(startIndex){
     knownRes[kr].criterion+", "+knownRes[kr].gt+", "+knownRes[kr].indiff+", "+knownRes[kr].lt + "\n");
     //console.log("------------------------------------\n");
     var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0, "Toshiba" : 0};
-    var zeroWorldCount = 0;
-    var longStr = "",
-    fileName = ""+objects.toString()+","+criteria.toString()+"";
+    var zeroWorldCount = 0,
+    longStr = "",
+    fileName = ""+objects.toString()+","+criteria.toString()+"",
+    oldFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
 
     // loop through all the possible worlds
-    var subWorldLength = math.round(baseN.length / 100);
-    var chunkNumber = 774841;
+    var subWorldLength = math.round(baseN.length),
+    chunkNumber = 106288, oldRankFile;
+
+    var data = fs.existsSync(oldFileName);
+    if(data) {
+      oldRankFile = fs.readFileSync(oldFileName);
+      dict = JSON.parse(oldRankFile);
+    }
 
     for(var ind = startIndex; ind < subWorldLength; ind++) {
 
       // take the snapshot of the progress
-      if(ind % (math.round((baseN.length - 1) / 500)) == 0 && ind > startIndex) {
+      if((ind % (math.round((baseN.length - 1) / 5)) == 0 && ind > startIndex) || (ind == subWorldLength - 1)) {
         var cnter = 0;
         for(var jk in dict)
         if(dict.hasOwnProperty(jk)) cnter++;
@@ -122,14 +162,14 @@ var GreedyArray = function(startIndex){
         wstream.end();
 
         if(startIndex > 0) {
-          var oldFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
-          var data = fs.readFileSync(oldFileName);
-          var oldDict = JSON.parse(data);
+          var oFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
+          oldRankFile = fs.readFileSync(oFileName);
+          var oldDict = JSON.parse(oldRankFile);
           //console.log("\n oldDict: "+data+"\n + \n");
           //console.log("\n dict: "+JSON.stringify(dict)+"\n + \n == \n");
           dict = mergeObject(dict, oldDict);
           //console.log("\n newDict: "+JSON.stringify(dict) + "\n");
-          fs.unlink(oldFileName, function(err){});
+          fs.unlink(oFileName, function(err){});
         }
 
         var wstrm = fs.createWriteStream("ranks_"+(startIndex / chunkNumber)+".json");
