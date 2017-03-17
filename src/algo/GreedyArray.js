@@ -4,7 +4,7 @@ math = require('mathjs'),
 fs = require('fs'),
 util = require('util'),
 sha1 = require('sha1'),
-heapdump = require('heapdump');
+heapdump = require('heapdump'),
 Combination = require("./Combination.js");
 
 
@@ -62,9 +62,9 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 }
 
 
-var GreedyArray = function(startIndex){
+var GreedyArray = function(startIndex, subWorldSize, iter){
 
-  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance'];
+  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
   var combn = new Combination(objects, criteria);
   var combination = combn.getCombination();
   var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], combination.length);
@@ -73,39 +73,6 @@ var GreedyArray = function(startIndex){
   var knownRes = [
     {
       'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'design', 'gt' : 0.5, 'lt' : 0.5, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'performance', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.8, 'lt' : 0.2, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.0, 'indiff' : 1.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.6, 'lt' : 0.0, 'indiff' : 0.4
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.8, 'lt' : 0.0, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.2, 'lt' : 0.2, 'indiff' : 0.6
-    },
-    {
-      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.8, 'indiff' : 0.2
     }
   ];
 
@@ -139,32 +106,47 @@ var GreedyArray = function(startIndex){
 
     // loop through all the possible worlds
     var subWorldLength = math.round(baseN.length),
-    chunkNumber = 106288, oldRankFile;
+    chunkNumber = subWorldSize, oldRankFile;
 
     var data = fs.existsSync(oldFileName);
     if(data) {
       oldRankFile = fs.readFileSync(oldFileName);
-      dict = JSON.parse(oldRankFile);
+      try{
+        dict = JSON.parse(oldRankFile);
+      } catch(e){
+        console.log("Invalid JSON file :(");
+      }
     }
 
     for(var ind = startIndex; ind < subWorldLength; ind++) {
 
       // take the snapshot of the progress
-      if((ind % (math.round((baseN.length - 1) / 5)) == 0 && ind > startIndex) || (ind == subWorldLength - 1)) {
+      if((ind % (math.round((baseN.length - 1) / iter)) == 0 && ind > startIndex) || (ind == subWorldLength - 1)) {
         var cnter = 0;
         for(var jk in dict)
         if(dict.hasOwnProperty(jk)) cnter++;
         console.log("Progress: " + math.round(((ind * 100) / baseN.length)) +"% ...." + " @"+ind);
 
         // save the intermediate data into files
-        var wstream = fs.createWriteStream(sha1(fileName)+".dat", {'flags': 'a', 'encoding': null, 'mode': 0666});
+        var wstream = fs.createWriteStream("data/"+startIndex+".dat", {'flags': 'a', 'encoding': null, 'mode': 0666});
         wstream.write(longStr);
         wstream.end();
 
         if(startIndex > 0) {
           var oFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
           oldRankFile = fs.readFileSync(oFileName);
-          var oldDict = JSON.parse(oldRankFile);
+          var oldDict;
+          if(oldRankFile){
+            try{
+              oldDict = JSON.parse(oldRankFile);
+            } catch(e){
+              console.log("Invalid JSON file :(");
+              break;
+            }
+          } else {
+            console.log("Looks like something tampered with the file and now its empty :(");
+            break;
+         }
           //console.log("\n oldDict: "+data+"\n + \n");
           //console.log("\n dict: "+JSON.stringify(dict)+"\n + \n == \n");
           dict = mergeObject(dict, oldDict);

@@ -13,7 +13,8 @@ CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
 async = require('async'),
-GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js");
+GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js"),
+GreedyArrayFile = require(__dirname + "/src/algo/GreedyArrayFile.js"),
 GreedyArray = require(__dirname + "/src/algo/GreedyArray.js");
 
 var schema = require(__dirname + "/src/db/Schema.js"),
@@ -689,7 +690,7 @@ var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", 
   //greedy.findPossibleWorlds();
   //greedy.traverseTree();
 
-  var gree = new GreedyArray();
+  var gree = new GreedyArray(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
   /*
   var cnt = 0;
   for(var t = 0; t < 3486784401; t++) cnt++;
@@ -705,37 +706,7 @@ var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", 
 startTime = new Date().getTime();
 //greedy.findPossibleWorlds();
 //greedy.traverseTree();
-
-var gree = new GreedyArray(process.env.START_INDEX);
-
-
-/*
-
-console.log("length : " +baseN.length);
-var cnt = 0, num = 3;//348678440000000;
-
-console.log("elem at "+num+": "+baseN.nth(num));
-console.log("elem at "+num+": "+baseN.nth(1));
-*/
-
-/*
-var Combinatorics = require('js-combinatorics');
-var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], 18);
-var crt = 0;
-var str = "";
-for(var k = 0; k < baseN.length; k++) {
-str += (baseN.nth(k) + "\n");
-crt++;
-if(crt % 1000000 == 0) {
-var wstream = fs.createWriteStream('worlds.dat', { 'flags': 'a', 'encoding': null, 'mode': 0666});
-wstream.write(str);
-wstream.end();
-console.log(crt);
-str = "";
-if((crt / 1000000) > 3) break;
-}
-}
-*/
+var gree = new GreedyArrayFile(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
 endTime = new Date().getTime();
 console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
 
@@ -748,4 +719,3 @@ var wstream = fs.createWriteStream("timemachine.txt", {'flags': 'w', 'encoding':
 var writeVal = pastTime + ((endTime - startTime) / 1000);
 wstream.write(writeVal+"");
 wstream.end();
-//process.exit(1);
