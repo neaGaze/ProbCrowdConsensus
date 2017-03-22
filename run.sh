@@ -3,6 +3,7 @@ WORLDS=387420489
 SUB_WORLD_SIZE=387420
 iter=1000
 SUB_WORLD=$((WORLDS / 1000))
+
 printf "%.*f\n" 0 $SUB_WORLD
 a=10
 for i in `seq -f "%.0f" 0 $SUB_WORLD $WORLDS`

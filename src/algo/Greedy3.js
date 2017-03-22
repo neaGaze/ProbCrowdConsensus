@@ -1,12 +1,9 @@
 var Combinatorics = require('js-combinatorics'),
-CrowdConsensus = require("../db/CrowdConsensus.js"),
 math = require('mathjs'),
 fs = require('fs'),
 util = require('util'),
 stream = require('stream')
 es = require('event-stream'),
-sha1 = require('sha1'),
-heapdump = require('heapdump'),
 readline = require('readline'),
 Combination = require("./Combination.js");
 
@@ -42,6 +39,17 @@ var mergeObject = function(dict, oldDict){
   return newDict;
 }
 
+/**
+* Check for zero probabilites at the inputs
+**/
+var checkForZeroProbInInputs = function(knownRes){
+  var size = knownRes.length;
+  if(knownRes[size - 1].gt <= 0 || knownRes[size - 1].lt <= 0 || knownRes[size - 1].indiff <= 0) {
+    return true;
+  }
+  return false;
+}
+
 var GreedyArrayFile = function(startIndex, fName, iter){
 
   var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
@@ -58,30 +66,6 @@ var GreedyArrayFile = function(startIndex, fName, iter){
     },
     {
       'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.8, 'lt' : 0.2, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.0, 'lt' : 0.0, 'indiff' : 1.0
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Apple', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.6, 'lt' : 0.0, 'indiff' : 0.4
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'design', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'HP', 'criterion' : 'performance', 'gt' : 0.8, 'lt' : 0.0, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 1.0, 'lt' : 0.0, 'indiff' : 0.0
-    },
-    {
-      'object1' : 'Dell', 'object2' : 'Toshiba', 'criterion' : 'performance', 'gt' : 0.4, 'lt' : 0.4, 'indiff' : 0.2
-    },
-    {
-      'object1' : 'HP', 'object2' : 'Toshiba', 'criterion' : 'design', 'gt' : 0.2, 'lt' : 0.2, 'indiff' : 0.6
     }
   ];
 
@@ -119,14 +103,19 @@ var GreedyArrayFile = function(startIndex, fName, iter){
     var subWorldLength = math.round(baseN.length),
     oldRankFile, oldFileName = 'ranks_'+(startIndex - 1)+".json";
 
+
     // now read data from the combined pareto-Optimal objects list inside the 'data' folder
     console.log("** Reading " + fName + " ***");
-    var s = fs.createReadStream(fName)
-    .pipe(es.split("\n"))
-    .pipe(es.mapSync(function(line){
+    var tmpCntr = 0, zeroWorldCount = 0;
+    var lineReader = readline.createInterface({
+      input: fs.createReadStream(fName)
+    });
 
-      // pause the readstream
-      s.pause();
+    var startTime = new Date().getTime();
+
+    lineReader.on('line', function (line) {
+
+      var isWorldProbZero = false;
 
       var splitted = line.split("->");
       var combinatn = splitted[0], pObjStr = splitted[1];
@@ -143,40 +132,56 @@ var GreedyArrayFile = function(startIndex, fName, iter){
         if(index > -1) {
           key += (c[al] +":");
           prob *= knownRes[pos2[index]][c[al]];
+          if(knownRes[pos2[index]][c[al]] <= 0) {
+            isWorldProbZero = true;
+            zeroWorldCount++;
+            break;
+          }
         }
       }
 
-      // Pareto-Optimal part
-      var pObjs = [];
-      if(pObjStr) pObjs = pObjStr.split(",");
+      if(!isWorldProbZero) {
+        // Pareto-Optimal part
+        var pObjs = [];
+        if(pObjStr) pObjs = pObjStr.split(",");
 
-      // find the probability of p-optimal object
-      if(!dict[key]) {
-        dict[key] = {'undefined' : 0.0};
-        for(var t = 0; t < objects.length; t++) dict[key][objects[t]] = 0.0;
+        // find the probability of p-optimal object
+        if(!dict[key]) {
+          dict[key] = {'undefined' : 0.0};
+          for(var t = 0; t < objects.length; t++) dict[key][objects[t]] = 0.0;
+        }
+
+        for(var m = 0; m < pObjs.length; m++) {
+          dict[key][pObjs[m]] += (math.exp(math.log(prob) + math.log(divi))); // or alternatively, (prob * divi);
+          counter[pObjs[m]] += 1;
+        }
+
+        if(pObjs.length == 0) {
+          dict[key].undefined += (math.exp(math.log(prob) + math.log(divi))); // or alternatively, (prob * divi);
+          counter['undefined'] += 1;
+        }
+
+        count++;
+        tmpCntr++;
+
+        if(false && checkForZeroProbInInputs(knownRes)) {
+          var wstream = fs.createWriteStream("data/newdata"+knownRes.length+".dat", {'flags': 'a', 'encoding': null, 'mode': 0666});
+          wstream.write(line + "\n");
+          wstream.end();
+        }
+
+        if(tmpCntr % 10022040 == 0){
+          var endTime = new Date().getTime();
+          console.log("--------------- Working: " + ((endTime - startTime) / 1000) + " secs -----------");
+        }
       }
+      // if(tmpCntr == 238022040)
 
-      for(var m = 0; m < pObjs.length; m++) {
-        dict[key][pObjs[m]] += (math.exp(math.log(prob) + math.log(divi))); // or alternatively, (prob * divi);
-        counter[pObjs[m]] += 1;
-      }
+    });
 
-      if(pObjs.length == 0) {
-        dict[key].undefined += (math.exp(math.log(prob) + math.log(divi))); // or alternatively, (prob * divi);
-        counter['undefined'] += 1;
-      }
+    // detect the end of line reader
+    lineReader.on('close', function () {
 
-      count++;
-
-      // resume the readstream, possibly from a callback
-      s.resume();
-    })
-
-    .on('error', function(){
-      console.log('\nError while reading file.\n');
-    })
-
-    .on('end', function(){
       console.log('Read entire file.');
       if(startIndex > 0) {
         var oFileName = 'ranks_'+(startIndex - 1)+".json";
@@ -195,7 +200,7 @@ var GreedyArrayFile = function(startIndex, fName, iter){
       }
 
       var wstrm = fs.createWriteStream("ranks_" + startIndex + ".json");
-      wstrm.write(JSON.stringify(dict));
+      wstrm.write("Something not necessary");
       wstrm.end();
 
       console.log('--------------------------');
@@ -216,8 +221,9 @@ var GreedyArrayFile = function(startIndex, fName, iter){
       }
       tmprank = tmprank.substring(0, tmprank.length - 1);
       console.log("\n" + tmprank + "\n");
-    })
-  );
-}
+      console.log("number of data: " + tmpCntr);
+      console.log("number of zero world: " + zeroWorldCount);
+    });
+  }
 
-module.exports = GreedyArrayFile;
+  module.exports = GreedyArrayFile;

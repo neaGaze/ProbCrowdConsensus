@@ -98,25 +98,16 @@ var GreedyArray = function(startIndex, subWorldSize, iter){
     console.log(knownRes[kr].object1+", "+knownRes[kr].object2+", "+
     knownRes[kr].criterion+", "+knownRes[kr].gt+", "+knownRes[kr].indiff+", "+knownRes[kr].lt + "\n");
     //console.log("------------------------------------\n");
-    var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0, "Toshiba" : 0};
+    var counter = {'undefined' : 0, 'Apple' : 0, 'Dell' : 0, 'HP' : 0, 'Toshiba' : 0};
     var zeroWorldCount = 0,
     longStr = "",
     fileName = ""+objects.toString()+","+criteria.toString()+"",
+    chunkNumber = subWorldSize, oldRankFile,
     oldFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
 
     // loop through all the possible worlds
-    var subWorldLength = math.round(baseN.length),
-    chunkNumber = subWorldSize, oldRankFile;
+    var subWorldLength = math.round(baseN.length);
 
-    var data = fs.existsSync(oldFileName);
-    if(data) {
-      oldRankFile = fs.readFileSync(oldFileName);
-      try{
-        dict = JSON.parse(oldRankFile);
-      } catch(e){
-        console.log("Invalid JSON file :(");
-      }
-    }
 
     for(var ind = startIndex; ind < subWorldLength; ind++) {
 
