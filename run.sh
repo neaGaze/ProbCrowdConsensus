@@ -19,6 +19,8 @@ do
     echo "Still waiting"
   done
 
+  cat "data2/$i.dat" >> data2/the_new_0.dat
+
   killall -9 node
   #if [$count -eq 2]
   #then
