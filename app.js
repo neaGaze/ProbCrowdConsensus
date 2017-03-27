@@ -12,6 +12,7 @@ math = require('mathjs'),
 CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
+QuesScheduler = require(__dirname + "/src/slack/QuesScheduler.js"),
 async = require('async'),
 GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js"),
 GreedyArrayFile = require(__dirname + "/src/algo/GreedyArrayFile.js"),
@@ -423,97 +424,7 @@ var questionLooper = function(cb_id, bot, message){
   QuesInquirer.create(replyParam);
 
   var askListener = function(userid){
-    //console.log('__userid to ask question____' + userid);
-
-    bot.startPrivateConversation({user : userid}, function(err, convo){
-
-      if(err) {
-        console.log(err);
-        return;
-      }
-
-      convo.ask({
-        delete_original : true,
-        attachments:[
-          {
-            title: "Between the two objects *" + replyParam.object1 + "* and *" + replyParam.object2 + "*, which is better on criteria *" + replyParam.criterion+"*",
-            fallback : 'You have a new question',
-            callback_id: "12345",
-            attachment_type: 'default',
-            actions: [
-              {
-                "name": ""+replyParam.object1 + "," + replyParam.object2+"," + replyParam.criterion,
-                "text": ""+replyParam.object1 + " > " + replyParam.object2,
-                "type": "button",
-                "value": "gt"
-              },
-              {
-                "name": ""+replyParam.object1 + "," + replyParam.object2+"," + replyParam.criterion,
-                "text": ""+replyParam.object1 + " < " + replyParam.object2,
-                "type": "button",
-                "value": "lt"
-              },
-              {
-                "name": ""+replyParam.object1 + "," + replyParam.object2+"," + replyParam.criterion,
-                "text": "" + replyParam.object1 + " ~ " + replyParam.object2,
-                "type": "button",
-                "value": "~",
-              }
-            ]
-          }
-        ]
-      },[
-        {
-          pattern: "gt",
-          callback: function(reply, convo) {
-            console.log("> replied recorded");
-            convo.say('You said  *' + replyParam.object1 +
-            '* is better than *' + replyParam.object2 + '* on criteria *' + replyParam.criterion+'*');
-            convo.next();
-
-            var username = lookupUserNameFromId(reply.user);
-            console.log("The username is : " + reply.user);
-            QuesInquirer.getInstance().answerRecorded();
-            saveInDB(cb_id, reply.user, reply.user, replyParam, '&gt;');
-          }
-        },
-        {
-          pattern: "lt",
-          callback: function(reply, convo) {
-            console.log("< replied recorded");
-            convo.say('You said  *' + replyParam.object2 +
-            '* is better than *' + replyParam.object1 + '* on criteria *' + replyParam.criterion+'*');
-            convo.next();
-            var username = lookupUserNameFromId(reply.user);
-            console.log("The username is : " + reply.user);
-            QuesInquirer.getInstance().answerRecorded();
-            saveInDB(cb_id, reply.user, reply.user, replyParam, '&lt;');
-          }
-        },
-        {
-          pattern: "~",
-          callback: function(reply, convo) {
-            console.log("~ replied recorded");
-            convo.say('You said  *' + replyParam.object2 +
-            '* is indifferent to *' + replyParam.object1 + '* on criteria *' + replyParam.criterion+'*');
-            convo.next();
-            var username = lookupUserNameFromId(reply.user);
-            console.log("The username is : " + reply.user);
-            QuesInquirer.getInstance().answerRecorded();
-            saveInDB(cb_id, reply.user, reply.user, replyParam, '&#126;');
-          }
-        },
-        {
-          default: true,
-          callback: function(reply, convo) {
-            console.log("default msg recorded");
-            // do nothing
-            convo.say('Your message reply duration was timed out. Sorry ');
-            convo.next();
-          }
-        }
-      ]);
-    });
+    // bot.startPrivateConversation(...);
   };
   QuesInquirer.getInstance().on('ask', askListener);
 
@@ -593,14 +504,6 @@ var questionLooper = function(cb_id, bot, message){
 
   QuesInquirer.getInstance().scheduleQues();
 
-  /* <<<<<<<  Starts Dummy question  >>>>>>>>>>>>> */
-  /*  var replyParam = {
-  object1 : 'Bond',
-  object2 : 'Hunt',
-  criterion : 'action'
-};
-*/
-/* <<<<<<<< Ends Dummy Question >>>>>>>>>>>>>> */
 };
 
 /************************************************************
@@ -622,15 +525,130 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
     var num = idFromChat[0], isFirstReply = true;
 
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
-      greedy = new GreedyApproach(cb_id).on("dataRetrieved", function(){
-        console.log("data retrieved caught");
-        //greedy.findPossibleWorlds();
-        greedy.greedyArray();
-        questionLooper(cb_id, bot, message);
-      });
 
-      greedy.on('questionReady', function(a){
-        console.log("wtf 3");
+      bot.api.users.list({}, function(err, res){
+        if(err) {
+          console.log("Failed to read users : " + err);
+          bot.reply("Sorry", 'Sorry, there has been an error: '+err);
+        }
+
+        if(!err) {
+          CrowdConsensus.getResponses(cb_id, function(resp){
+
+            QuesScheduler.create(resp);
+
+            for(var member in res.members) {
+              if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT') {
+                QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
+              }
+            }
+
+            // Listener that is triggered when a question is paired with suitable candidates and ready to ask them question
+            var getQuesUserPairListener = function(pair, uid){
+              // console.log('**\n The paired users will now be asked questions \n**');
+
+              //for(var i = 0; i < pair.candidates.length; i++)
+              bot.startPrivateConversation({user : uid}, function(err, convo){
+
+                if(err) {
+                  console.log(err);
+                  return;
+                }
+
+                convo.ask({
+                  delete_original : true,
+                  attachments:[
+                    {
+                      title: "Between the two objects *" + pair.object1 + "* and *" + pair.object2 + "*, which is better on criteria *" + pair.criterion+"*",
+                      fallback : 'You have a new question',
+                      callback_id: "12345",
+                      attachment_type: 'default',
+                      actions: [
+                        {
+                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                          "text": ""+pair.object1 + " > " + pair.object2,
+                          "type": "button",
+                          "value": "gt"
+                        },
+                        {
+                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                          "text": ""+pair.object1 + " < " + pair.object2,
+                          "type": "button",
+                          "value": "lt"
+                        },
+                        {
+                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                          "text": "" + pair.object1 + " ~ " + pair.object2,
+                          "type": "button",
+                          "value": "~",
+                        }
+                      ]
+                    }
+                  ]
+                },[
+                  {
+                    pattern: "gt",
+                    callback: function(reply, convo) {
+                      console.log("> replied recorded");
+                      convo.say('You said  *' + pair.object1 +
+                      '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
+                      convo.next();
+                      var username = lookupUserNameFromId(reply.user);
+                      console.log("The username is : " + reply.user);
+                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
+                //      saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
+                    }
+                  },
+                  {
+                    pattern: "lt",
+                    callback: function(reply, convo) {
+                      console.log("< replied recorded");
+                      convo.say('You said  *' + pair.object2 +
+                      '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                      convo.next();
+                      var username = lookupUserNameFromId(reply.user);
+                      console.log("The username is : " + reply.user);
+                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
+              //        saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
+                    }
+                  },
+                  {
+                    pattern: "~",
+                    callback: function(reply, convo) {
+                      console.log("~ replied recorded");
+                      convo.say('You said  *' + pair.object2 +
+                      '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                      convo.next();
+                      var username = lookupUserNameFromId(reply.user);
+                      console.log("The username is : " + reply.user);
+                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
+              //        saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
+                    }
+                  },
+                  {
+                    default: true,
+                    callback: function(reply, convo) {
+                      console.log("default msg recorded");
+                      // do nothing
+                      convo.say('Your message reply duration was timed out. Sorry ');
+                      convo.next();
+                    }
+                  }
+                ]);
+
+                // add timer for that user to know if he has answered within the specified time limit
+                QuesScheduler.getInstance().startTimer(pair, uid);
+              });
+            };
+
+            QuesScheduler.getInstance().on('question_user_paired', getQuesUserPairListener);
+            QuesScheduler.getInstance().on('problem_finish', function(a){
+              console.log("__________THE PROBLEM IS FINISHED_____________");
+              
+            });
+            QuesScheduler.getInstance().scheduleQues();
+          });
+        }
       });
     });
   }
@@ -676,46 +694,23 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 });
 
 
-controller.hears(["run"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
   /*
   crowdCollect('58a621fbbe5761064acee0f1', function(arr){
   console.log('crowdCollect success');
 });
 */
 
+  process.exit(1);
 
 var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
   console.log("data retreived caught");
   startTime = new Date().getTime();
-  //greedy.findPossibleWorlds();
-  //greedy.traverseTree();
 
   var gree = new GreedyArray(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
-  /*
-  var cnt = 0;
-  for(var t = 0; t < 3486784401; t++) cnt++;
-  console.log("print: "+cnt);
-  */
+
   endTime = new Date().getTime();
   console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
-  process.exit(1);
 });
 
 });
-
-startTime = new Date().getTime();
-//greedy.findPossibleWorlds();
-//greedy.traverseTree();
-var gree = new GreedyArrayFile(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
-endTime = new Date().getTime();
-console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
-
-var pastTime = 0;
-if(fs.existsSync('timemachine.txt')) {
-  var pastTimeStr = fs.readFileSync('timemachine.txt');
-  pastTime = Number(pastTimeStr);
-}
-var wstream = fs.createWriteStream("timemachine.txt", {'flags': 'w', 'encoding': null, 'mode': 0666});
-var writeVal = pastTime + ((endTime - startTime) / 1000);
-wstream.write(writeVal+"");
-wstream.end();

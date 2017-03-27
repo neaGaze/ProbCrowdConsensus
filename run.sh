@@ -1,11 +1,24 @@
 #!/bin/bash
+
+#############################################################################################
+# merge both 'run.sh' and 'run3.sh'. Read the objects and criteria from 'objects.txt' and 'criteria.txt' respectively.
+# And reading from the latest file write after each iteration
+##############################################################################################
+
+# Read from 'objects.txt' and 'criteria.txt'
+OBJECTS_COUNT=$(cat objects.txt | wc -l)
+CRITERIA_COUNT=$(cat criteria.txt | wc -l)
+#COMB=$(echo {1..$((OBJECTS_COUNT))}:{1..$((OBJECTS_COUNT-1))} | awk '{ gsub(":", "\n") } 1' | wc -l)
+#COMB=$((COMB-1))
+
+
 WORLDS=387420489
 SUB_WORLD_SIZE=387420
 iter=1000
-SUB_WORLD=$((WORLDS / 1000))
+SUB_WORLD=$((WORLDS/iter))
 
 printf "%.*f\n" 0 $SUB_WORLD
-a=10
+
 for i in `seq -f "%.0f" 0 $SUB_WORLD $WORLDS`
 do
   START_INDEX="$i" SUBWORLD_SIZE="$SUB_WORLD_SIZE" iter="$iter" node newapp.js &

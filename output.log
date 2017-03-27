@@ -1,0 +1,122 @@
+"U483QM6J2"
+"U497Q9H9D"
+"U47GNQXJR"
+"U2CN7TNJG"
+"U2AEQGRJA"
+
+Ferrari  power Mercedes --> U483QM6J2, 4
+Ferrari  power Mercedes --> U497Q9H9D, 3
+Ferrari  power Lambhorgini --> U47GNQXJR, 2
+Ferrari  power Lambhorgini --> U2CN7TNJG, 1
+Ferrari  power Toyota --> U2AEQGRJA, 0
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U483QM6J2","U497Q9H9D"],"hasAnsweredList":[],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":["U47GNQXJR","U2CN7TNJG"],"hasAnsweredList":[],"isValid":true},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":[],"isValid":true},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+< The username is : U47GNQXJR
+> The username is : U483QM6J2
+> The username is : U2AEQGRJA
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Ferrari  power Mercedes --> U2CN7TNJG, 4, ["U47GNQXJR","U2AEQGRJA","U2CN7TNJG","U497Q9H9D"]
+Ferrari  power Lambhorgini --> U497Q9H9D, 3, ["U483QM6J2","U2AEQGRJA","U497Q9H9D"]
+Ferrari  power Toyota --> U47GNQXJR, 2, ["U47GNQXJR","U483QM6J2"]
+Ferrari  power BMW --> U2AEQGRJA, 1, ["U483QM6J2","U2AEQGRJA"]
+Mercedes  power Lambhorgini --> U483QM6J2, 0, ["U483QM6J2"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":["U47GNQXJR"],"hasAnsweredList":["U2AEQGRJA"],"isValid":true},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":["U483QM6J2"],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+< The username is : U483QM6J2
+> The username is : U47GNQXJR
+> The username is : U2AEQGRJA
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Ferrari  power Mercedes --> U2CN7TNJG, 4, ["U47GNQXJR","U2AEQGRJA","U497Q9H9D","U2CN7TNJG"]
+Ferrari  power Lambhorgini --> U497Q9H9D, 3, ["U483QM6J2","U2AEQGRJA","U497Q9H9D"]
+Ferrari  power BMW --> U47GNQXJR, 2, ["U483QM6J2","U47GNQXJR"]
+Mercedes  power Lambhorgini --> U2AEQGRJA, 1, ["U2AEQGRJA"]
+Mercedes  power Toyota --> U483QM6J2, 0, ["U483QM6J2"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":["U47GNQXJR"],"hasAnsweredList":["U2AEQGRJA"],"isValid":true},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":["U483QM6J2"],"hasAnsweredList":[],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+> The username is : U47GNQXJR
+< The username is : U2AEQGRJA
+> The username is : U483QM6J2
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Ferrari  power Mercedes --> U2CN7TNJG, 4, ["U47GNQXJR","U2AEQGRJA","U497Q9H9D","U2CN7TNJG"]
+Ferrari  power Lambhorgini --> U483QM6J2, 3, ["U2AEQGRJA","U483QM6J2","U497Q9H9D"]
+Mercedes  power Toyota --> U497Q9H9D, 2, ["U47GNQXJR","U2AEQGRJA","U497Q9H9D"]
+Mercedes  power BMW --> U47GNQXJR, 1, ["U47GNQXJR","U2AEQGRJA"]
+Lambhorgini  power Toyota --> U2AEQGRJA, 0, ["U2AEQGRJA"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":["U483QM6J2"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":["U47GNQXJR"],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":[],"isValid":true},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+< The username is : U483QM6J2
+> The username is : U2AEQGRJA
+~ The username is : U47GNQXJR
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Ferrari  power Mercedes --> U2CN7TNJG, 4, ["U2AEQGRJA","U47GNQXJR","U2CN7TNJG","U497Q9H9D"]
+Mercedes  power Toyota --> U497Q9H9D, 3, ["U2AEQGRJA","U47GNQXJR","U497Q9H9D"]
+Mercedes  power BMW --> U2AEQGRJA, 2, ["U483QM6J2","U2AEQGRJA"]
+Lambhorgini  power Toyota --> U483QM6J2, 1, ["U483QM6J2","U47GNQXJR"]
+Lambhorgini  power BMW --> U47GNQXJR, 0, ["U47GNQXJR"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":["U483QM6J2"],"hasAnsweredList":["U2AEQGRJA"],"isValid":true},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":["U47GNQXJR"],"hasAnsweredList":[],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+> The username is : U47GNQXJR
+> The username is : U483QM6J2
+~ The username is : U2AEQGRJA
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Ferrari  power Mercedes --> U2AEQGRJA, 4, ["U47GNQXJR","U2AEQGRJA","U2CN7TNJG","U497Q9H9D"]
+Mercedes  power Toyota --> U497Q9H9D, 3, ["U47GNQXJR","U2CN7TNJG","U497Q9H9D"]
+Lambhorgini  power BMW --> U2CN7TNJG, 2, ["U483QM6J2","U2CN7TNJG"]
+Toyota  power BMW --> U47GNQXJR, 1, ["U47GNQXJR","U483QM6J2"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U483QM6J2"],"isValid":false},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":["U47GNQXJR"],"hasAnsweredList":[],"isValid":true}]
+
+********************************************
+< The username is : U47GNQXJR
+> The username is : U2AEQGRJA
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Mercedes  power Toyota --> U2AEQGRJA, 4, ["U47GNQXJR","U2AEQGRJA","U2CN7TNJG","U497Q9H9D"]
+Lambhorgini  power BMW --> U497Q9H9D, 3, ["U483QM6J2","U2CN7TNJG","U497Q9H9D"]
+Toyota  power BMW --> U483QM6J2, 2, ["U483QM6J2","U2CN7TNJG"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":["U483QM6J2"],"isValid":true},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U483QM6J2"],"isValid":false},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":["U497Q9H9D"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":["U483QM6J2"],"hasAnsweredList":["U47GNQXJR"],"isValid":true}]
+
+********************************************
+> The username is : U2AEQGRJA
+< The username is : U483QM6J2
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Lambhorgini  power BMW --> U2CN7TNJG, 4, ["U2CN7TNJG","U2AEQGRJA","U483QM6J2","U497Q9H9D"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U483QM6J2"],"isValid":false},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":["U2CN7TNJG"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false}]
+
+********************************************
+** Countdown over. The question-user pair is broken so we find the new candidate to ask the question **
+
+Lambhorgini  power BMW --> U2AEQGRJA, 4, ["U2AEQGRJA","U483QM6J2","U497Q9H9D","U2CN7TNJG"]
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U483QM6J2"],"isValid":false},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":["U2AEQGRJA"],"hasAnsweredList":["U47GNQXJR"],"isValid":true},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false}]
+
+********************************************
+> The username is : U2AEQGRJA
+
+[{"object1":"Ferrari","object2":"Mercedes","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Ferrari","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false},{"object1":"Ferrari","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Ferrari","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U47GNQXJR"],"isValid":false},{"object1":"Mercedes","object2":"Lambhorgini","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U483QM6J2","U2AEQGRJA"],"isValid":false},{"object1":"Mercedes","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Lambhorgini","object2":"Toyota","criterion":"power","candidates":[],"hasAnsweredList":["U2AEQGRJA","U483QM6J2"],"isValid":false},{"object1":"Lambhorgini","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U2AEQGRJA"],"isValid":false},{"object1":"Toyota","object2":"BMW","criterion":"power","candidates":[],"hasAnsweredList":["U47GNQXJR","U483QM6J2"],"isValid":false}]
+
+********************************************
