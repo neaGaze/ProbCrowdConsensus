@@ -39,6 +39,7 @@ mongoose.connect(mongodb_url, function (error) {
 
 var greedy;
 var startTime, endTime;
+var sampleSize = nconf.get("NUMBER_OF_USERS_TO_ASK");
 
 var app = express();
 
@@ -223,7 +224,7 @@ var upsert = function(oneReply, callback){
         'criterion' : questionParam.criterion
       }, function(err, count){
 
-        if(count <= nconf.get('THRESHOLD') - 1) {
+        if(count <= sampleSize - 1) {
           var crModel = new CCReply();
 
           crModel.parent_id = cb_id;
@@ -238,10 +239,35 @@ var upsert = function(oneReply, callback){
           crModel.save(function(err, body){
             console.error(err);
             console.log('the new entry is now saved in CrowdReply');
+
+            // aggregate crowd replies into CrowdConsensus collection
+            crowdCollect(cb_id, function(replyCrowdCollect){
+
+              // update the response field with the replyCrowdCollect in crowdconsensus collection
+              // using async library
+              var arr1 = [];
+              async.each(replyCrowdCollect, function(file, callback){
+                arr1.push(function(callback1){
+                  upsert(file, function(){
+                    callback1(null, '');
+                  });
+                });
+                console.log("---------NEW PROB VALUES_______");
+                console.log(JSON.stringify(file));
+                callback();
+              }, function(err){
+                if(err) console.error(err);
+
+                async.parallel(arr1, function(err, results){
+                  if(err) console.error(err);
+                  console.log(" results -> " + JSON.stringify(results));
+                });
+              });
+            });
           });
-        } else if(count >= nconf.get('THRESHOLD')) {
+        } else if(count >= sampleSize) {
           console.log("Sorry we can't update your responses for ("+ questionParam.object1 +
-          " " + questionParam.criterion + " "+ questionParam.object2 +") into our database because we have saturated our " + nconf.get('THRESHOLD') + " limitation of responses");
+          " " + questionParam.criterion + " "+ questionParam.object2 +") into our database because we have saturated our " + sampleSize + " limitation of responses");
         }
       });
     };
@@ -520,6 +546,8 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
             var getQuesUserPairListener = function(pair, uid){
               // console.log('**\n The paired users will now be asked questions \n**');
 
+              sampleSize = QuesScheduler.getInstance().minUserThreshold;
+
               bot.startPrivateConversation({user : uid}, function(err, convo){
 
                 if(err) {
@@ -616,30 +644,6 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
             QuesScheduler.getInstance().on('question_user_paired', getQuesUserPairListener);
             QuesScheduler.getInstance().on('min_threshold_satisfied', function(a){
 
-              // aggregate crowd replies into CrowdConsensus collection
-              crowdCollect(cb_id, function(replyCrowdCollect){
-
-                // update the response field with the replyCrowdCollect in crowdconsensus collection
-                // using async library
-                var arr1 = [];
-                async.each(replyCrowdCollect, function(file, callback){
-                  arr1.push(function(callback1){
-                    upsert(file, function(){
-                      callback1(null, '');
-                    });
-                  });
-                  console.log("---------NEW PROB VALUES_______");
-                  console.log(JSON.stringify(file));
-                  callback();
-                }, function(err){
-                  if(err) console.error(err);
-
-                  async.parallel(arr1, function(err, results){
-                    if(err) console.error(err);
-                    console.log(" results -> " + JSON.stringify(results));
-                  });
-                });
-              });
             });
 
             QuesScheduler.getInstance().on('problem_finish', function(a){
