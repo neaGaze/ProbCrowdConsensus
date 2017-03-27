@@ -467,38 +467,7 @@ var questionLooper = function(cb_id, bot, message){
     QuesInquirer.getInstance().removeListener('min_threshold_satisfied', minThresholdSatisfiedListener);
     QuesInquirer.getInstance() == null;
 
-    // aggregate crowd replies into CrowdConsensus collection
-    crowdCollect(cb_id, function(replyCrowdCollect){
-
-      // update the response field with the replyCrowdCollect in crowdconsensus collection
-      // using async library
-      var arr1 = [];
-      async.each(replyCrowdCollect, function(file, callback){
-        arr1.push(function(callback1){
-          upsert(file, function(){
-            callback1(null, '');
-          });
-        });
-        console.log("---------NEW PROB VALUES_______");
-        console.log(JSON.stringify(file));
-        greedy.changeProbValues(file);
-        callback();
-      }, function(err){
-        if(err) console.error(err);
-
-        async.parallel(arr1, function(err, results){
-          if(err) console.error(err);
-
-          console.log(" results -> " + JSON.stringify(results));
-          // now ask new question
-          // repeat the loop again to generate new question
-          console.log("You will be asked a new question as we have the minimum number of crowdsourcers answering to the previous question");
-          greedy.traverseTree();
-          questionLooper(cb_id, bot, message);
-        });
-      });
-    });
-
+    // crowdCollect(...);
   };
   QuesInquirer.getInstance().on('min_threshold_satisfied', minThresholdSatisfiedListener);
 
@@ -536,18 +505,21 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
           CrowdConsensus.getResponses(cb_id, function(resp){
 
             QuesScheduler.create(resp);
+            var popnCount = 0;
 
             for(var member in res.members) {
               if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT') {
                 QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
+                popnCount++;
               }
             }
+
+            QuesScheduler.getInstance().totalPopulation = popnCount;
 
             // Listener that is triggered when a question is paired with suitable candidates and ready to ask them question
             var getQuesUserPairListener = function(pair, uid){
               // console.log('**\n The paired users will now be asked questions \n**');
 
-              //for(var i = 0; i < pair.candidates.length; i++)
               bot.startPrivateConversation({user : uid}, function(err, convo){
 
                 if(err) {
@@ -589,37 +561,40 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                   {
                     pattern: "gt",
                     callback: function(reply, convo) {
-                      convo.say('You said  *' + pair.object1 +
-                      '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
-                      convo.next();
                       var username = lookupUserNameFromId(reply.user);
                       console.log("The username is : " + reply.user + ", >");
-                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-                      saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
+                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                        convo.say('You said  *' + pair.object1 +
+                        '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
+                        saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
+                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                      convo.next();
                     }
                   },
                   {
                     pattern: "lt",
                     callback: function(reply, convo) {
-                      convo.say('You said  *' + pair.object2 +
-                      '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
-                      convo.next();
                       var username = lookupUserNameFromId(reply.user);
                       console.log("The username is : " + reply.user + ", <");
-                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-                      saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
+                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                        convo.say('You said  *' + pair.object2 +
+                        '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                        saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
+                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                      convo.next();
                     }
                   },
                   {
                     pattern: "~",
                     callback: function(reply, convo) {
-                      convo.say('You said  *' + pair.object2 +
-                      '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
-                      convo.next();
                       var username = lookupUserNameFromId(reply.user);
                       console.log("The username is : " + reply.user + ", ~");
-                      QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-                      saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
+                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                        convo.say('You said  *' + pair.object2 +
+                        '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                        saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
+                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                      convo.next();
                     }
                   },
                   {
@@ -627,7 +602,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                     callback: function(reply, convo) {
                       console.log("default msg recorded");
                       // do nothing
-                      convo.say('Your message reply duration was timed out. Sorry ');
+                      convo.say('Oops! Your message reply duration was timed out. Sorry! ');
                       convo.next();
                     }
                   }

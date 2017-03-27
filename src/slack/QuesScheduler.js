@@ -1,6 +1,7 @@
 var util = require('util'),
 nconf = require('nconf'),
 math = require('mathjs'),
+fs = require('fs'),
 Combination = require("../algo/Combination.js"),
 EventEmitter = require('events').EventEmitter;
 
@@ -12,11 +13,13 @@ function QuesScheduler(param){
   this.activeUsers = [];
   this.timers = {};
   this.questionList = [];
-  this.questionThreshold = nconf.get('THRESHOLD');
   this.usersToAsk = nconf.get('NUMBER_OF_USERS_TO_ASK');
   this.solvedProblemCount = 0;
   this.TOTAL_USERS = 0;
   this.TIMEOUT_FOR_USER_TO_RESPOND = 20000;
+  this.confidenceInterval = nconf.get("CONFIDENCE_INTERVAL");
+  this.marginOfError = nconf.get("MARGIN_OF_ERROR");
+  this.totalPopulation = 5;
 };
 
 function create(param){
@@ -32,6 +35,26 @@ var getInstance = function(){
   return self;
 };
 
+/**************************************************************************************************
+* Generate sample size given the population size(N), confidence interval(z) and margin of error(d)
+***************************************************************************************************/
+QuesScheduler.prototype.generateSampleSize = function(callback) {
+  fs.readFile(__dirname+'/../../var/t-table.json', 'utf8', function(err, data){
+      if (err) throw err;
+      var ttable = JSON.parse(data);
+      // assuming p = 1/3 or conservative guess
+      var normalizedConfidenceLevel = math.round(((1 - self.confidenceInterval) / 2) * 1000) / 1000;
+      var m = math.square(ttable[self.totalPopulation+""][normalizedConfidenceLevel+""] / self.marginOfError) * 0.222;
+      var sample = (5 * m) / (4 + m);
+      if(sample)
+         sample = math.ceil(sample);
+       else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
+      console.log("sample size: " + sample);
+      callback(sample);
+  });
+
+}
+
 /********************************************************************************************
 * Assign different users with different questions
 ********************************************************************************************/
@@ -43,35 +66,37 @@ QuesScheduler.prototype.scheduleQues = function(){
   self.TOTAL_USERS = self.activeUsers.length;
   for(var p = 0; p < self.TOTAL_USERS; p++) console.log(JSON.stringify(this.activeUsers[p]));
 
-  // TODO right now we're reading from 'nconf' but we need to generate this number using confidence internval.
-  // Visit link: https://onlinecourses.science.psu.edu/stat506/node/11 for more details
-  self.minUserThreshold = nconf.get('NUMBER_OF_USERS_TO_ASK');
+  // Visit link: https://onlinecourses.science.psu.edu/stat506/node/11
+  // and https://onlinecourses.science.psu.edu/stat414/node/264 for more details on confidence interval
+  QuesScheduler.prototype.generateSampleSize.call(this, function(sampleSize){
+    self.minUserThreshold = sampleSize;
+    
+    var noUsersLeft = false;
+    // Initialization of Question - to - User pairing
+    for(var q = 0; q < self.questionList.length; q++) {
 
-  var noUsersLeft = false;
-  // Initialization of Question - to - User pairing
-  for(var q = 0; q < self.questionList.length; q++) {
+      self.questionList[q].candidates = [];
+      self.questionList[q].hasAnsweredList = [];
+      self.questionList[q].isValid = true;  //to check if the question has already enough sample users, false if sample sufficient
+      console.log("min thres: " + self.minUserThreshold);
+      if(self.activeUsers.length > 0) {
 
-    self.questionList[q].candidates = [];
-    self.questionList[q].hasAnsweredList = [];
-    self.questionList[q].isValid = true;  //to check if the question has already enough sample users, false if sample sufficient
+        for(var r = 0; r < self.minUserThreshold; r++) {
+          var user = self.activeUsers.shift();
+          self.questionList[q].candidates.push(user);
 
-    if(self.activeUsers.length > 0) {
+          console.log("" + self.questionList[q].object1 + "  " + self.questionList[q].criterion + " " +
+          self.questionList[q].object2 + " --> " + user + ", " + self.activeUsers.length);
 
-      for(var r = 0; r < self.minUserThreshold; r++) {
-        var user = self.activeUsers.shift();
-        self.questionList[q].candidates.push(user);
+          self.emit('question_user_paired', self.questionList[q], user);
 
-        console.log("" + self.questionList[q].object1 + "  " + self.questionList[q].criterion + " " +
-        self.questionList[q].object2 + " --> " + user + ", " + self.activeUsers.length);
-
-        self.emit('question_user_paired', self.questionList[q], user);
-
-        if(self.activeUsers.length <= 0) break;
+          if(self.activeUsers.length <= 0) break;
+        }
       }
     }
-  }
-  console.log("\n"+JSON.stringify(self.questionList));
-  console.log("\n********************************************");
+    console.log("\n"+JSON.stringify(self.questionList));
+    console.log("\n********************************************");
+  });
 };
 
 
@@ -177,6 +202,7 @@ QuesScheduler.prototype.timedOut = function(pair, user){
 
         var index = self.questionList[i].candidates.indexOf(user);
         if(index > -1) self.questionList[i].candidates.splice(index, 1);
+        else return -1;
 
         self.activeUsers.push(user);
         index = i;
@@ -197,6 +223,7 @@ QuesScheduler.prototype.timedOut = function(pair, user){
 
     // replenish the available users pool and nullify the timer
     var index = QuesScheduler.prototype.timedOut.call(this, pair, user);
+    if(index < 0) return false;
 
     // record the user to the answered list of the question
     self.questionList[index].hasAnsweredList.push(user);
@@ -205,6 +232,8 @@ QuesScheduler.prototype.timedOut = function(pair, user){
     if(self.activeUsers.length == self.TOTAL_USERS)
     QuesScheduler.prototype.batchDispatchSchedule(this);
     //QuesScheduler.prototype.reSchedule.call(this, index);
+
+    return true;
   };
 
 
