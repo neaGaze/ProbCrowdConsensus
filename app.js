@@ -589,40 +589,37 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                   {
                     pattern: "gt",
                     callback: function(reply, convo) {
-                      console.log("> replied recorded");
                       convo.say('You said  *' + pair.object1 +
                       '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
                       convo.next();
                       var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user);
+                      console.log("The username is : " + reply.user + ", >");
                       QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-                //      saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
+                      saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
                     }
                   },
                   {
                     pattern: "lt",
                     callback: function(reply, convo) {
-                      console.log("< replied recorded");
                       convo.say('You said  *' + pair.object2 +
                       '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
                       convo.next();
                       var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user);
+                      console.log("The username is : " + reply.user + ", <");
                       QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-              //        saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
+                      saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
                     }
                   },
                   {
                     pattern: "~",
                     callback: function(reply, convo) {
-                      console.log("~ replied recorded");
                       convo.say('You said  *' + pair.object2 +
                       '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
                       convo.next();
                       var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user);
+                      console.log("The username is : " + reply.user + ", ~");
                       QuesScheduler.getInstance().answerRecorded(pair, reply.user);
-              //        saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
+                      saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
                     }
                   },
                   {
@@ -642,9 +639,36 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
             };
 
             QuesScheduler.getInstance().on('question_user_paired', getQuesUserPairListener);
+            QuesScheduler.getInstance().on('min_threshold_satisfied', function(a){
+
+              // aggregate crowd replies into CrowdConsensus collection
+              crowdCollect(cb_id, function(replyCrowdCollect){
+
+                // update the response field with the replyCrowdCollect in crowdconsensus collection
+                // using async library
+                var arr1 = [];
+                async.each(replyCrowdCollect, function(file, callback){
+                  arr1.push(function(callback1){
+                    upsert(file, function(){
+                      callback1(null, '');
+                    });
+                  });
+                  console.log("---------NEW PROB VALUES_______");
+                  console.log(JSON.stringify(file));
+                  callback();
+                }, function(err){
+                  if(err) console.error(err);
+
+                  async.parallel(arr1, function(err, results){
+                    if(err) console.error(err);
+                    console.log(" results -> " + JSON.stringify(results));
+                  });
+                });
+              });
+            });
+
             QuesScheduler.getInstance().on('problem_finish', function(a){
               console.log("__________THE PROBLEM IS FINISHED_____________");
-              
             });
             QuesScheduler.getInstance().scheduleQues();
           });
@@ -701,7 +725,7 @@ controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"
 });
 */
 
-  process.exit(1);
+process.exit(1);
 
 var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
   console.log("data retreived caught");

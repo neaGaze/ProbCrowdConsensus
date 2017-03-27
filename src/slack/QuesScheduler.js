@@ -113,6 +113,8 @@ QuesScheduler.prototype.batchDispatchSchedule = function(){
       self.questionList[q].isValid = false;
       self.solvedProblemCount++;
 
+      self.emit('min_threshold_satisfied','');
+
       // no more questions to ask
       if(self.solvedProblemCount == self.questionList.length) self.emit('problem_finish','');
     }
