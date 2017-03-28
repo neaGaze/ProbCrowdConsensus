@@ -9,6 +9,7 @@ dateformat = require('dateformat'),
 Botkit = require('botkit'),
 fs = require('fs'),
 math = require('mathjs'),
+request = require('request'),
 CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
@@ -648,6 +649,33 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
 
             QuesScheduler.getInstance().on('problem_finish', function(a){
               console.log("__________THE PROBLEM IS FINISHED_____________");
+
+              // now pass the data to the algorithm through shell script
+              var totalWorld = math.pow(3, QuesScheduler.getInstance().questionList.length);
+              var chunkSize = totalWorld, iter = 1;
+              while(chunkSize > 400000) {
+                chunkSize = chunkSize / 10;
+                iter *= 10;
+              }
+
+              var options = {
+                url: nconf.get("DEST_IP_ADDR")+'pinger',
+                method: 'POST',
+                headers: {
+                  'User-Agent':       'Super Agent/0.0.1',
+                  'Content-Type':     'application/x-www-form-urlencoded'
+                },
+                form: {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : cb_id}
+              };
+
+              // Start the request
+              request(options, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                  // Print out the response body
+                  console.log(body)
+                }
+              });
+
             });
             QuesScheduler.getInstance().scheduleQues();
           });
@@ -716,4 +744,31 @@ var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", 
   console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
 });
 
+});
+
+// test for sending post request
+// Configure the request
+var totalWorld = math.pow(3, 10);
+var chunkSize = totalWorld, iter = 1;
+while(chunkSize > 400000) {
+  chunkSize = chunkSize / 10;
+  iter *= 10;
+}
+
+var options = {
+  url: nconf.get("DEST_IP_ADDR") + 'pinger',
+  method: 'POST',
+  headers: {
+    'User-Agent':       'Super Agent/0.0.1',
+    'Content-Type':     'application/x-www-form-urlencoded'
+  },
+  form: {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : '58a621fbbe5761064ace4444'}
+};
+
+// Start the request
+request(options, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    // Print out the response body
+    console.log(body)
+  }
 });

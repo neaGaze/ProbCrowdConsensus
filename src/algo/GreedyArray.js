@@ -3,10 +3,7 @@ CrowdConsensus = require("../db/CrowdConsensus.js"),
 math = require('mathjs'),
 fs = require('fs'),
 util = require('util'),
-sha1 = require('sha1'),
-heapdump = require('heapdump'),
 Combination = require("./Combination.js");
-
 
 var ENABLE_LOGGING = false;
 
@@ -62,7 +59,11 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 }
 
 
-var GreedyArray = function(startIndex, subWorldSize, iter){
+var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
+
+  CrowdConsensus.getResponses(cb_id, function(resp){
+
+  });
 
   var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
   var combn = new Combination(objects, criteria);

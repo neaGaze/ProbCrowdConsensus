@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 startTime = new Date().getTime();
-var gree = new GreedyArray(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
+var gree = new GreedyArray(process.env.ID, process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
 endTime = new Date().getTime();
 console.log("--------------- " + ((endTime - startTime) / 1000) + " secs -----------");
 

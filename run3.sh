@@ -12,7 +12,7 @@ i=newdata2.dat
 #for i in `ls *.dat | sort -n`;
 #do
   cd ..
-  START_INDEX="$count" SUBWORLD_SIZE="data/$i" iter=5 node newapp3.js &
+  START_INDEX="$count" SUBWORLD_SIZE="data/$i" iter=5 PORT=3001 node newapp3.js &
   filename="ranks_$count.json"
   count=$((count+1))
   while [ ! -f "$filename" ]; do
