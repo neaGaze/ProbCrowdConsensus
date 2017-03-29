@@ -21,7 +21,7 @@ printf "%.*f\n" 0 $SUB_WORLD
 
 for i in `seq -f "%.0f" 0 $SUB_WORLD $WORLDS`
 do
-  START_INDEX="$i" SUBWORLD_SIZE="$SUB_WORLD_SIZE" iter="$iter" ID="$id" PORT=3001 node newapp.js &
+  START_INDEX="$i" SUBWORLD_SIZE="$SUB_WORLD_SIZE" iter="$iter" ID="$id" PORT=3001 node newapp.js > output.log &
   actualNumber=$(echo $((i/SUB_WORLD_SIZE)) | awk '{ print sprintf("%.9f", $1); }')
   count=$(printf "%.*f\n" 0 $actualNumber)
   filename="ranks_$count.json"

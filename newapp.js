@@ -9,9 +9,6 @@ fs = require('fs'),
 math = require('mathjs'),
 GreedyArray = require(__dirname + "/src/algo/GreedyArray.js");
 
-
-var port = process.env.PORT || 3000;
-
 var startTime, endTime;
 
 var app = express();

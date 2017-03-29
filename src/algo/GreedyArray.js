@@ -3,6 +3,8 @@ CrowdConsensus = require("../db/CrowdConsensus.js"),
 math = require('mathjs'),
 fs = require('fs'),
 util = require('util'),
+nconf = require('nconf'),
+mongoose = require('mongoose'),
 Combination = require("./Combination.js");
 
 var ENABLE_LOGGING = false;
@@ -61,8 +63,10 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 
 var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
 
-  CrowdConsensus.getResponses(cb_id, function(resp){
-
+console.log("The response: " + cb_id);
+//  CrowdConsensus.getResponses(cb_id, function(resp){
+var resp = JSON.parse(cb_id);
+console.log("Connected to mongodb. Got response from it.");
   //  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
     var objects = resp.objects, criteria = resp.criteria;
 
@@ -378,7 +382,7 @@ var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
       }
       tmprank = tmprank.substring(0, tmprank.length - 1);
       console.log("\n" + tmprank + "\n");
-    });
+  //  });
 
     //process.exit(1);
   }

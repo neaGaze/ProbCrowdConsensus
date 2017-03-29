@@ -1,6 +1,7 @@
 var http = require('http'),
 express = require('express'),
 bodyParser = require('body-parser'),
+child_process = require('child_process'),
 exec = require('exec');
 
 var app = express();
@@ -9,7 +10,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/pinger', function (req, res) {
+app.post('/pinger', function (req, res) {
   console.log('Welcome to the universe');
 
   var totalWorld = req.body.totalWorld,
@@ -17,7 +18,7 @@ app.get('/pinger', function (req, res) {
   iter = req.body.iter,
   cb_id = req.body.cb_id;
 
-  exec('./run.sh '+totalWorld+" "+chunkSize+" "+iter +" " + cb_id, function (error, stdout, stderr) {
+  child_process.execFile('./run.sh ', [totalWorld, chunkSize, iter, cb_id], function (error, stdout, stderr) {
     console.log('stdout: ' + stdout);
     console.log('stderr: ' + stderr);
     if (error !== null) {

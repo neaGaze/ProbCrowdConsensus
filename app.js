@@ -282,8 +282,8 @@ var upsert = function(oneReply, callback){
       // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
     }).configureSlackApp(
       {
-        clientId: nconf.get("CLIENT_ID"),
-        clientSecret: nconf.get("CLIENT_SECRET"),
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         scopes: ['bot']
       }
     );
@@ -549,6 +549,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
 
               sampleSize = QuesScheduler.getInstance().minUserThreshold;
 
+              if(uid == "U28260VFX")
               bot.startPrivateConversation({user : uid}, function(err, convo){
 
                 if(err) {
@@ -726,49 +727,44 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 
 
 controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-  /*
-  crowdCollect('58a621fbbe5761064acee0f1', function(arr){
-  console.log('crowdCollect success');
-});
-*/
-
-process.exit(1);
-
-var greedy = new GreedyApproach("58a621fbbe5761064ace4444").on("dataRetrieved", function(){
-  console.log("data retreived caught");
-  startTime = new Date().getTime();
-
-  var gree = new GreedyArray(process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);
-
-  endTime = new Date().getTime();
-  console.log("--------------- " + ((endTime - startTime) / 1000) + " secs-----------");
+  console.log("Now exit the program bro...");
+  process.exit(1);
 });
 
-});
+if(false)
+CrowdConsensus.getResponses("58a621fbbe5761064ace4444", function(resp){
+  console.log("____Voila mongo connected");
 
-// test for sending post request
-// Configure the request
-var totalWorld = math.pow(3, 10);
-var chunkSize = totalWorld, iter = 1;
-while(chunkSize > 400000) {
-  chunkSize = chunkSize / 10;
-  iter *= 10;
-}
-
-var options = {
-  url: nconf.get("DEST_IP_ADDR") + 'pinger',
-  method: 'POST',
-  headers: {
-    'User-Agent':       'Super Agent/0.0.1',
-    'Content-Type':     'application/x-www-form-urlencoded'
-  },
-  form: {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : '58a621fbbe5761064ace4444'}
-};
-
-// Start the request
-request(options, function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    // Print out the response body
-    console.log(body)
+  // test for sending post request
+  // Configure the request
+  var totalWorld = math.pow(3, 10);
+  var chunkSize = totalWorld, iter = 1;
+  while(chunkSize > 400000) {
+    chunkSize = chunkSize / 10;
+    iter *= 10;
   }
+
+  //   form:
+  var options = {
+    url: 'http://192.168.0.11:3001/pinger',
+    method: 'POST',
+    headers: {
+      'User-Agent':       'Super Agent/0.0.1',
+      'Content-Type':     'application/x-www-form-urlencoded'
+    },
+    form : {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : resp}
+  };
+
+  // Start the request
+  request(options, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      // Print out the response body
+      console.log(body)
+    }
+  });
 });
+
+
+
+
+//var gree = new GreedyArray("58a621fbbe5761064ace4444", 59040, 59040, 1);
