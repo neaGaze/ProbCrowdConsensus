@@ -517,7 +517,11 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
   var idFromChat = all_msg.match(/\d+/);
 
   if(idFromChat == null) bot.reply(message, "You need to add the number as well");
-  else {
+  else if(QuesScheduler.self) {
+    bot.startPrivateConversation(message,function(err,dm) {
+      dm.say('You need to wait until all other people have answered the question');
+    });
+  } else {
     var num = idFromChat[0], isFirstReply = true;
 
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
@@ -536,7 +540,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
 
             for(var member in res.members) {
               if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT' && !res.members[member].deleted  //) {
-              && (res.members[member].id == "U28260VFX" /*|| res.members[member].id == "U281R5JFJ"*/)) {
+                  && (res.members[member].id == "U28260VFX" /*|| res.members[member].id == "U281R5JFJ"*/)) {
                 QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
                 popnCount++;
                 console.log(res.members[member].name);
@@ -634,7 +638,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                       console.log("default msg recorded");
                       // do nothing
                       convo.say('Oops! Your message reply duration was timed out. Sorry! ');
-                      convo.next();
+                      //convo.next();
                     }
                   }
                 ]);
@@ -678,7 +682,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                 }
               });
 
-              QuesScheduler.destroy();
+              setTimeout(function(){QuesScheduler.destroy();}, 10000);
             });
             QuesScheduler.getInstance().scheduleQues();
           });
@@ -734,12 +738,6 @@ controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"
   CrowdConsensus.getResponses("58a621fbbe5761064ace4444", function(resp){
     console.log("____Voila mongo connected");
 
-    /*
-    var wstream = fs.createWriteStream("values.json", {'flags': 'w', 'encoding': null, 'mode': 0666});
-    wstream.write(JSON.stringify(resp));
-    wstream.end();
-    */
-
     // test for sending post request
     // Configure the request
     var totalWorld = math.pow(3, 10);
@@ -749,46 +747,8 @@ controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"
       iter *= 10;
     }
 
-    /*
-    //   form:
-    var options = {
-    url: 'http://192.168.0.11:3001/pinger',
-    method: 'POST',
-    headers: {
-    'User-Agent':       'Super Agent/0.0.1',
-    'Content-Type':     'application/x-www-form-urlencoded'
-  },
-  form : {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : jsFile}
-};
+    request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
 
-// Start the request
-request(options, function (error, response, body) {
-if (!error && response.statusCode == 200) {
-// Print out the response body
-console.log(body)
-}
-});
-*/
-
-
-var formData = {
-  totalWorld : 30,
-  chunkSize : 50,
-  iter : 1,
-  cb_id : fs.createReadStream("values.json")
-};
-
-/*
-request.post('http://192.168.0.11:3001/pinger', {formData : formData}, function (error, response, body) {
-if (!error && response.statusCode == 200) {
-// Print out the response body
-console.log(body)
-}
-});
-*/
-
-request.post('http://192.168.0.11:3001/pinger').form({totalWorld : 30, chunkSize : 40, iter : 1, cb_id : "58a621fbbe5761064ace4444"});
-
-});
-process.exit(1);
+  });
+  // process.exit(1);
 });

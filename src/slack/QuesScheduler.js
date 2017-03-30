@@ -260,4 +260,5 @@ QuesScheduler.prototype.timedOut = function(pair, user){
 
   module.exports = QuesScheduler;
   module.exports.create = create;
+  module.exports.destroy = destroy;
   module.exports.getInstance = getInstance;
