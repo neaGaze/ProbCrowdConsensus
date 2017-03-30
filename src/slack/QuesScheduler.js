@@ -29,6 +29,10 @@ function create(param){
   return self;
 };
 
+function destroy(){
+  self = null;
+}
+
 util.inherits(QuesScheduler, EventEmitter);
 
 var getInstance = function(){
@@ -44,8 +48,9 @@ QuesScheduler.prototype.generateSampleSize = function(callback) {
       var ttable = JSON.parse(data);
       // assuming p = 1/3 or conservative guess
       var normalizedConfidenceLevel = math.round(((1 - self.confidenceInterval) / 2) * 1000) / 1000;
+      console.log("popn: " + self.totalPopulation);
       var m = math.square(ttable[self.totalPopulation+""][normalizedConfidenceLevel+""] / self.marginOfError) * 0.222;
-      var sample = (5 * m) / (4 + m);
+      var sample = (self.totalPopulation * m) / (self.totalPopulation - 1 + m);
       if(sample)
          sample = math.ceil(sample);
        else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
@@ -64,13 +69,13 @@ QuesScheduler.prototype.scheduleQues = function(){
   self.questionList = combn.getCombination();
 
   self.TOTAL_USERS = self.activeUsers.length;
-  for(var p = 0; p < self.TOTAL_USERS; p++) console.log(JSON.stringify(this.activeUsers[p]));
+  // for(var p = 0; p < self.TOTAL_USERS; p++) console.log(JSON.stringify(this.activeUsers[p]));
 
   // Visit link: https://onlinecourses.science.psu.edu/stat506/node/11
   // and https://onlinecourses.science.psu.edu/stat414/node/264 for more details on confidence interval
   QuesScheduler.prototype.generateSampleSize.call(this, function(sampleSize){
     self.minUserThreshold = sampleSize;
-    
+
     var noUsersLeft = false;
     // Initialization of Question - to - User pairing
     for(var q = 0; q < self.questionList.length; q++) {

@@ -535,9 +535,11 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
             var popnCount = 0;
 
             for(var member in res.members) {
-              if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT') {
+              if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT' && !res.members[member].deleted  //) {
+              && (res.members[member].id == "U28260VFX" /*|| res.members[member].id == "U281R5JFJ"*/)) {
                 QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
                 popnCount++;
+                console.log(res.members[member].name);
               }
             }
 
@@ -549,7 +551,6 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
 
               sampleSize = QuesScheduler.getInstance().minUserThreshold;
 
-              if(uid == "U28260VFX")
               bot.startPrivateConversation({user : uid}, function(err, convo){
 
                 if(err) {
@@ -677,6 +678,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
                 }
               });
 
+              QuesScheduler.destroy();
             });
             QuesScheduler.getInstance().scheduleQues();
           });
@@ -728,43 +730,65 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 
 controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
   console.log("Now exit the program bro...");
-  process.exit(1);
-});
 
-if(false)
-CrowdConsensus.getResponses("58a621fbbe5761064ace4444", function(resp){
-  console.log("____Voila mongo connected");
+  CrowdConsensus.getResponses("58a621fbbe5761064ace4444", function(resp){
+    console.log("____Voila mongo connected");
 
-  // test for sending post request
-  // Configure the request
-  var totalWorld = math.pow(3, 10);
-  var chunkSize = totalWorld, iter = 1;
-  while(chunkSize > 400000) {
-    chunkSize = chunkSize / 10;
-    iter *= 10;
-  }
+    /*
+    var wstream = fs.createWriteStream("values.json", {'flags': 'w', 'encoding': null, 'mode': 0666});
+    wstream.write(JSON.stringify(resp));
+    wstream.end();
+    */
 
-  //   form:
-  var options = {
+    // test for sending post request
+    // Configure the request
+    var totalWorld = math.pow(3, 10);
+    var chunkSize = totalWorld, iter = 1;
+    while(chunkSize > 400000) {
+      chunkSize = chunkSize / 10;
+      iter *= 10;
+    }
+
+    /*
+    //   form:
+    var options = {
     url: 'http://192.168.0.11:3001/pinger',
     method: 'POST',
     headers: {
-      'User-Agent':       'Super Agent/0.0.1',
-      'Content-Type':     'application/x-www-form-urlencoded'
-    },
-    form : {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : resp}
-  };
+    'User-Agent':       'Super Agent/0.0.1',
+    'Content-Type':     'application/x-www-form-urlencoded'
+  },
+  form : {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : jsFile}
+};
 
-  // Start the request
-  request(options, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      // Print out the response body
-      console.log(body)
-    }
-  });
+// Start the request
+request(options, function (error, response, body) {
+if (!error && response.statusCode == 200) {
+// Print out the response body
+console.log(body)
+}
 });
+*/
 
 
+var formData = {
+  totalWorld : 30,
+  chunkSize : 50,
+  iter : 1,
+  cb_id : fs.createReadStream("values.json")
+};
 
+/*
+request.post('http://192.168.0.11:3001/pinger', {formData : formData}, function (error, response, body) {
+if (!error && response.statusCode == 200) {
+// Print out the response body
+console.log(body)
+}
+});
+*/
 
-//var gree = new GreedyArray("58a621fbbe5761064ace4444", 59040, 59040, 1);
+request.post('http://192.168.0.11:3001/pinger').form({totalWorld : 30, chunkSize : 40, iter : 1, cb_id : "58a621fbbe5761064ace4444"});
+
+});
+process.exit(1);
+});

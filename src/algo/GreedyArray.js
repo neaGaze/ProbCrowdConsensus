@@ -63,9 +63,9 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 
 var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
 
-console.log("The response: " + cb_id);
-//  CrowdConsensus.getResponses(cb_id, function(resp){
-var resp = JSON.parse(cb_id);
+console.log("The cb_id: " + cb_id);
+  CrowdConsensus.getResponses(cb_id, function(resp){
+//var resp = JSON.parse(cb_id);
 console.log("Connected to mongodb. Got response from it.");
   //  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
     var objects = resp.objects, criteria = resp.criteria;
@@ -382,7 +382,7 @@ console.log("Connected to mongodb. Got response from it.");
       }
       tmprank = tmprank.substring(0, tmprank.length - 1);
       console.log("\n" + tmprank + "\n");
-  //  });
+    });
 
     //process.exit(1);
   }
