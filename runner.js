@@ -18,6 +18,19 @@ app.post('/pinger', function (req, res) {
   iter = req.body.iter,
   cb_id = req.body.cb_id;
 
+	console.log("-> " + totalWorld +", " + chunkSize + ", " + iter + ", "+cb_id);
+
+child_process.execFile("./run.sh", [totalWorld, chunkSize, iter, cb_id], function (error, stdout, stderr) {
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+    if (error !== null) {
+      console.log('exec error: ' + error);
+    }
+
+    res.status(200).send('\nProgram ran successfully in destination machine\n');
+  });
+
+/*
   child_process.execFile('./run.sh ', [totalWorld, chunkSize, iter, cb_id], function (error, stdout, stderr) {
     console.log('stdout: ' + stdout);
     console.log('stderr: ' + stderr);
@@ -27,6 +40,7 @@ app.post('/pinger', function (req, res) {
 
     res.status(200).send('\nProgram ran successfully in destination machine\n');
   });
+  */
 });
 
 app.listen(3001, function(){
