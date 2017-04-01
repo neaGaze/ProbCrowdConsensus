@@ -4,5 +4,6 @@
   "NUMBER_OF_USERS_TO_ASK" : 2,
   "CONFIDENCE_INTERVAL" : 0.8,
   "MARGIN_OF_ERROR" : 0.3,
-  "DEST_IP_ADDR" : "http://192.168.0.11:3001/"
+  "DEST_IP_ADDR" : "http://192.168.0.11:3001",
+  "HOST_IP_ADDR" : "http://localhost:3003"
 }

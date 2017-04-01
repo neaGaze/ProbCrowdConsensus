@@ -376,12 +376,21 @@ console.log("Connected to mongodb. Got response from it.");
 
       if(ENABLE_LOGGING) console.log("--------FINAL counter -> " + JSON.stringify(counter));
 
+      // Begin formatting output
       var tmprank = "";
       for(var ey in ranks) {
         tmprank += ("'" + ey + "': " + "'" + math.round(ranks[ey], 4) + "', ");
+        ranks[ey] = math.round(ranks[ey], 4);
       }
       tmprank = tmprank.substring(0, tmprank.length - 1);
+      // End formatting output
+
       console.log("\n" + tmprank + "\n");
+
+          var ws1 = fs.createWriteStream("results/"+cb_id+".json");
+          ws1.write(JSON.stringify(ranks));
+          ws1.end();
+
     });
 
     //process.exit(1);

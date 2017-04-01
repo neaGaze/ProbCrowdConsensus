@@ -735,20 +735,43 @@ controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"
 controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
   console.log("Now exit the program bro...");
 
-  CrowdConsensus.getResponses("58a621fbbe5761064ace4444", function(resp){
+  CrowdConsensus.getResponses("58a621fbb55671064acee0f1", function(resp){
     console.log("____Voila mongo connected");
 
     // test for sending post request
     // Configure the request
-    var totalWorld = math.pow(3, 10);
+    var totalWorld = math.pow(3, 12);
     var chunkSize = totalWorld, iter = 1;
     while(chunkSize > 400000) {
       chunkSize = chunkSize / 10;
       iter *= 10;
     }
 
-    request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
+    //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
+
+    request({
+        url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
+        method: 'POST',
+        //Lets post the following key/values as form
+        form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbb55671064acee0f1"}
+    }, function(error, response, body){
+        if(error) {
+            console.log(error);
+        } else {
+            console.log(response.statusCode, body);
+        }
+    });
 
   });
   // process.exit(1);
+});
+
+app.post('/getResults', function(req, res) {
+  var data = req.body;
+  console.log("The results: " + JSON.stringify(data));
+  res.status(200).send('Data received. Thanks Algorithm!');
+});
+
+app.listen(3003, function(){
+  console.log("Server listening on port 3003...");
 });
