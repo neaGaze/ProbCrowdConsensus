@@ -3,6 +3,7 @@ express = require('express'),
 bodyParser = require('body-parser'),
 path = require('path'),
 mongoose = require('mongoose'),
+util = require('util'),
 nconf = require('nconf'),
 https = require('https'),
 dateformat = require('dateformat'),
@@ -502,6 +503,40 @@ var questionLooper = function(cb_id, bot, message){
 
 };
 
+/*********************************************************
+* Detect Slash Commands
+**********************************************************/
+controller.on('slash_command',function(bot,message) {
+
+  if(message.text === "") {
+    bot.replyPublic(message,'<@' + message.user + '> is cool!');
+    //bot.replyPrivate(message,'*nudge nudge wink wink*');
+
+    //for(var each in bot) console.log(JSON.stringify(each));
+  } else if(parseInt(message.text)) {
+    var problemId = parseInt(message.text);
+
+    CrowdConsensus.findId(problemId, true, function(cb_id){
+
+      bot.api.channels.info({channel : message.channel}, function(err, res){
+        if(err) {
+          console.log("Failed to read users : " + err);
+          bot.reply("Sorry", 'Sorry, there has been an error: '+err);
+        } else {
+          var usersInChannel = res.channel.members;
+          for(var i = 0; i < usersInChannel.length; i++) console.log(usersInChannel[i]);
+        }
+      });
+    });
+
+    bot.replyPublic(message, "Jaile public garni?");
+    //bot.replyPrivate(message,'*nudge nudge wink wink*');
+    //bot.replyPublicDelayed(message,'Reply Delayed');
+    console.log("messge channel : " + message.channel);
+  }
+
+});
+
 /************************************************************
 * To start asking questions to all the users visible
 **************************************************************/
@@ -540,238 +575,235 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
 
             for(var member in res.members) {
               if(!res.members[member].is_bot && res.members[member].id !== 'USLACKBOT' && !res.members[member].deleted  //) {
-                  && (res.members[member].id == "U28260VFX" /*|| res.members[member].id == "U281R5JFJ"*/)) {
-                QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
-                popnCount++;
-                console.log(res.members[member].name);
-              }
-            }
-
-            QuesScheduler.getInstance().totalPopulation = popnCount;
-
-            // Listener that is triggered when a question is paired with suitable candidates and ready to ask them question
-            var getQuesUserPairListener = function(pair, uid){
-              // console.log('**\n The paired users will now be asked questions \n**');
-
-              sampleSize = QuesScheduler.getInstance().minUserThreshold;
-
-              bot.startPrivateConversation({user : uid}, function(err, convo){
-
-                if(err) {
-                  console.log(err);
-                  return;
+                && (res.members[member].id == "U28260VFX" /*|| res.members[member].id == "U281R5JFJ"*/)) {
+                  QuesScheduler.getInstance().activeUsers.push(res.members[member].id);
+                  popnCount++;
+                  console.log(res.members[member].name);
                 }
-
-                convo.ask({
-                  delete_original : true,
-                  attachments:[
-                    {
-                      title: "Between the two objects *" + pair.object1 + "* and *" + pair.object2 + "*, which is better on criteria *" + pair.criterion+"*",
-                      fallback : 'You have a new question',
-                      callback_id: "12345",
-                      attachment_type: 'default',
-                      actions: [
-                        {
-                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
-                          "text": ""+pair.object1 + " > " + pair.object2,
-                          "type": "button",
-                          "value": "gt"
-                        },
-                        {
-                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
-                          "text": ""+pair.object1 + " < " + pair.object2,
-                          "type": "button",
-                          "value": "lt"
-                        },
-                        {
-                          "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
-                          "text": "" + pair.object1 + " ~ " + pair.object2,
-                          "type": "button",
-                          "value": "~",
-                        }
-                      ]
-                    }
-                  ]
-                },[
-                  {
-                    pattern: "gt",
-                    callback: function(reply, convo) {
-                      var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user + ", >");
-                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
-                        convo.say('You said  *' + pair.object1 +
-                        '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
-                        saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
-                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
-                      convo.next();
-                    }
-                  },
-                  {
-                    pattern: "lt",
-                    callback: function(reply, convo) {
-                      var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user + ", <");
-                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
-                        convo.say('You said  *' + pair.object2 +
-                        '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
-                        saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
-                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
-                      convo.next();
-                    }
-                  },
-                  {
-                    pattern: "~",
-                    callback: function(reply, convo) {
-                      var username = lookupUserNameFromId(reply.user);
-                      console.log("The username is : " + reply.user + ", ~");
-                      if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
-                        convo.say('You said  *' + pair.object2 +
-                        '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
-                        saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
-                      } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
-                      convo.next();
-                    }
-                  },
-                  {
-                    default: true,
-                    callback: function(reply, convo) {
-                      console.log("default msg recorded");
-                      // do nothing
-                      convo.say('Oops! Your message reply duration was timed out. Sorry! ');
-                      //convo.next();
-                    }
-                  }
-                ]);
-
-                // add timer for that user to know if he has answered within the specified time limit
-                QuesScheduler.getInstance().startTimer(pair, uid);
-              });
-            };
-
-            QuesScheduler.getInstance().on('question_user_paired', getQuesUserPairListener);
-            QuesScheduler.getInstance().on('min_threshold_satisfied', function(a){
-
-            });
-
-            QuesScheduler.getInstance().on('problem_finish', function(a){
-              console.log("__________THE PROBLEM IS FINISHED_____________");
-
-              // now pass the data to the algorithm through shell script
-              var totalWorld = math.pow(3, QuesScheduler.getInstance().questionList.length);
-              var chunkSize = totalWorld, iter = 1;
-              while(chunkSize > 400000) {
-                chunkSize = chunkSize / 10;
-                iter *= 10;
               }
 
-              var options = {
-                url: nconf.get("DEST_IP_ADDR")+'pinger',
-                method: 'POST',
-                headers: {
-                  'User-Agent':       'Super Agent/0.0.1',
-                  'Content-Type':     'application/x-www-form-urlencoded'
-                },
-                form: {'totalWorld' : totalWorld, 'chunkSize' : chunkSize, 'iter' : iter, 'cb_id' : cb_id}
+              QuesScheduler.getInstance().totalPopulation = popnCount;
+
+              // Listener that is triggered when a question is paired with suitable candidates and ready to ask them question
+              var getQuesUserPairListener = function(pair, uid){
+                // console.log('**\n The paired users will now be asked questions \n**');
+
+                sampleSize = QuesScheduler.getInstance().minUserThreshold;
+
+                bot.startPrivateConversation({user : uid}, function(err, convo){
+
+                  if(err) {
+                    console.log(err);
+                    return;
+                  }
+
+                  convo.ask({
+                    delete_original : true,
+                    attachments:[
+                      {
+                        title: "Between the two objects *" + pair.object1 + "* and *" + pair.object2 + "*, which is better on criteria *" + pair.criterion+"*",
+                        fallback : 'You have a new question',
+                        callback_id: "12345",
+                        attachment_type: 'default',
+                        actions: [
+                          {
+                            "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                            "text": ""+pair.object1 + " > " + pair.object2,
+                            "type": "button",
+                            "value": "gt"
+                          },
+                          {
+                            "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                            "text": ""+pair.object1 + " < " + pair.object2,
+                            "type": "button",
+                            "value": "lt"
+                          },
+                          {
+                            "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                            "text": "" + pair.object1 + " ~ " + pair.object2,
+                            "type": "button",
+                            "value": "~",
+                          }
+                        ]
+                      }
+                    ]
+                  },[
+                    {
+                      pattern: "gt",
+                      callback: function(reply, convo) {
+                        var username = lookupUserNameFromId(reply.user);
+                        console.log("The username is : " + reply.user + ", >");
+                        if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                          convo.say('You said  *' + pair.object1 +
+                          '* is better than *' + pair.object2 + '* on criteria *' + pair.criterion+'*');
+                          saveInDB(cb_id, reply.user, reply.user, pair, '&gt;');
+                        } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                        convo.next();
+                      }
+                    },
+                    {
+                      pattern: "lt",
+                      callback: function(reply, convo) {
+                        var username = lookupUserNameFromId(reply.user);
+                        console.log("The username is : " + reply.user + ", <");
+                        if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                          convo.say('You said  *' + pair.object2 +
+                          '* is better than *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                          saveInDB(cb_id, reply.user, reply.user, pair, '&lt;');
+                        } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                        convo.next();
+                      }
+                    },
+                    {
+                      pattern: "~",
+                      callback: function(reply, convo) {
+                        var username = lookupUserNameFromId(reply.user);
+                        console.log("The username is : " + reply.user + ", ~");
+                        if(QuesScheduler.getInstance().answerRecorded(pair, reply.user)) {
+                          convo.say('You said  *' + pair.object2 +
+                          '* is indifferent to *' + pair.object1 + '* on criteria *' + pair.criterion+'*');
+                          saveInDB(cb_id, reply.user, reply.user, pair, '&#126;');
+                        } else convo.say("Oops! Your message reply duration was timed out. Sorry! ");
+                        convo.next();
+                      }
+                    },
+                    {
+                      default: true,
+                      callback: function(reply, convo) {
+                        console.log("default msg recorded");
+                        // do nothing
+                        convo.say('Oops! Your message reply duration was timed out. Sorry! ');
+                        //convo.next();
+                      }
+                    }
+                  ]);
+
+                  // add timer for that user to know if he has answered within the specified time limit
+                  QuesScheduler.getInstance().startTimer(pair, uid);
+                });
               };
 
-              // Start the request
-              request(options, function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                  // Print out the response body
-                  console.log(body)
-                }
+              QuesScheduler.getInstance().on('question_user_paired', getQuesUserPairListener);
+              QuesScheduler.getInstance().on('min_threshold_satisfied', function(a){
+
               });
 
-              setTimeout(function(){QuesScheduler.destroy();}, 10000);
+              QuesScheduler.getInstance().on('problem_finish', function(a){
+                console.log("__________THE PROBLEM IS FINISHED_____________");
+
+                var totalWorld = math.pow(3, QuesScheduler.getInstance().questionList.length);
+                var chunkSize = totalWorld, iter = 1;
+                while(chunkSize > 400000) {
+                  chunkSize = chunkSize / 10;
+                  chunkSize = chunkSize >> 0;  // convert into integer
+                  iter *= 10;
+                }
+                //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
+
+                // now pass the data to the algorithm through shell script
+                request({
+                  url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
+                  method: 'POST',
+                  //Lets post the following key/values as form
+                  form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id}
+                }, function(error, response, body){
+                  if(error) {
+                    console.log(error);
+                  } else {
+                    console.log(response.statusCode, body);
+                  }
+                });
+
+                setTimeout(function(){QuesScheduler.destroy();}, 10000);
+              });
+              QuesScheduler.getInstance().scheduleQues();
             });
-            QuesScheduler.getInstance().scheduleQues();
-          });
-        }
-      });
-    });
-  }
-});
-
-// Show the list of problems upon being asked for help
-controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-
-  CrowdConsensus.getList(function(lists){
-    var attachments = [],
-    attachment1 = {
-      title: 'If you want to create a new Pareto-Optimal Finding Problem, just upload your JSON file into '+
-      'any channel and write \'crowdconsensus\' as the comment in the upload',
-      color: '#87CEFA',
-      fields: []
-    },
-    attachment2 = {
-      title: 'Please use this ID to reply to the Problem you want to participate \n ID  |  Description',
-      color: '#FFCC99',
-      fields: []
-    },
-    replyObj = {
-      text: 'Hello, Seems like you need some help. Don\'t worry. I\'m here to help. Take a look into some of my suggestions below:\n'
-    };
-
-    for(var i = 0; i < lists.length; i++){
-      attachment2.fields.push({
-        id: lists[i].id,
-        title: (i + 1) + "  |  " + lists[i].desc
+          }
+        });
       });
     }
+  });
 
-    attachments.push(attachment1);
-    if(lists.length > 0)
-    attachments.push(attachment2);
+  // Show the list of problems upon being asked for help
+  controller.hears(["Help"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
 
-    replyObj.attachments = attachments;
+    CrowdConsensus.getList(function(lists){
+      var attachments = [],
+      attachment1 = {
+        title: 'If you want to create a new Pareto-Optimal Finding Problem, just upload your JSON file into '+
+        'any channel and write \'crowdconsensus\' as the comment in the upload',
+        color: '#87CEFA',
+        fields: []
+      },
+      attachment2 = {
+        title: 'Please use this ID to reply to the Problem you want to participate \n ID  |  Description',
+        color: '#FFCC99',
+        fields: []
+      },
+      replyObj = {
+        text: 'Hello, Seems like you need some help. Don\'t worry. I\'m here to help. Take a look into some of my suggestions below:\n'
+      };
 
-    bot.reply(message, replyObj, function(err,resp) {
-      console.log(err,resp);
+      for(var i = 0; i < lists.length; i++){
+        attachment2.fields.push({
+          id: lists[i].id,
+          title: (i + 1) + "  |  " + lists[i].desc
+        });
+      }
+
+      attachments.push(attachment1);
+      if(lists.length > 0)
+      attachments.push(attachment2);
+
+      replyObj.attachments = attachments;
+
+      bot.reply(message, replyObj, function(err,resp) {
+        console.log(err,resp);
+      });
     });
   });
-});
 
 
-controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-  console.log("Now exit the program bro...");
+  controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+    console.log("Now exit the program bro...");
 
-  CrowdConsensus.getResponses("58a621fbb55671064acee0f1", function(resp){
-    console.log("____Voila mongo connected");
+    CrowdConsensus.getResponses("58a621fbb55671064acee0f1", function(resp){
+      console.log("____Voila mongo connected");
 
-    // test for sending post request
-    // Configure the request
-    var totalWorld = math.pow(3, 12);
-    var chunkSize = totalWorld, iter = 1;
-    while(chunkSize > 400000) {
-      chunkSize = chunkSize / 10;
-      iter *= 10;
-    }
+      // test for sending post request
+      // Configure the request
+      var totalWorld = math.pow(3, 12);
+      var chunkSize = totalWorld, iter = 1;
+      while(chunkSize > 400000) {
+        chunkSize = chunkSize / 10;
+        chunkSize = chunkSize >> 0;  // convert into integer
+        iter *= 10;
+      }
+      //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
 
-    //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
-
-    request({
+      request({
         url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
         method: 'POST',
         //Lets post the following key/values as form
         form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbb55671064acee0f1"}
-    }, function(error, response, body){
+      }, function(error, response, body){
         if(error) {
-            console.log(error);
+          console.log(error);
         } else {
-            console.log(response.statusCode, body);
+          console.log(response.statusCode, body);
         }
+      });
+
     });
-
+    // process.exit(1);
   });
-  // process.exit(1);
-});
 
-app.post('/getResults', function(req, res) {
-  var data = req.body;
-  console.log("The results: " + JSON.stringify(data));
-  res.status(200).send('Data received. Thanks Algorithm!');
-});
+  app.post('/getResults', function(req, res) {
+    var data = req.body;
+    console.log("The results: " + JSON.stringify(data));
+    res.status(200).send('Data received. Thanks Algorithm!');
+  });
 
-app.listen(3003, function(){
-  console.log("Server listening on port 3003...");
-});
+  app.listen(3003, function(){
+    console.log("Server listening on port 3003...");
+  });

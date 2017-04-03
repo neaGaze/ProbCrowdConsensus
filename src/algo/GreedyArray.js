@@ -63,11 +63,11 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 
 var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
 
-console.log("The cb_id: " + cb_id);
+  console.log("The cb_id: " + cb_id);
   CrowdConsensus.getResponses(cb_id, function(resp){
-//var resp = JSON.parse(cb_id);
-console.log("Connected to mongodb. Got response from it.");
-  //  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
+    //var resp = JSON.parse(cb_id);
+    console.log("Connected to mongodb. Got response from it.");
+    //  var objects = ['Apple','Dell','HP','Toshiba'], criteria = ['design','performance','speed'];
     var objects = resp.objects, criteria = resp.criteria;
 
     var combn = new Combination(objects, criteria);
@@ -75,13 +75,13 @@ console.log("Connected to mongodb. Got response from it.");
     var baseN = Combinatorics.baseN(['gt', 'lt','indiff'], combination.length);
     var worlds = [];
     var count = 1;
-/*
-  var knownRes = [
-      {
-        'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'design', 'gt' : 0.5, 'lt' : 0.5, 'indiff' : 0.0
-      }
+    /*
+    var knownRes = [
+    {
+    'object1' : 'Apple', 'object2' : 'Dell', 'criterion' : 'design', 'gt' : 0.5, 'lt' : 0.5, 'indiff' : 0.0
+    }
     ];
-*/
+    */
     var knownRes = resp.responses;
 
     var dict = {}, pos = [];
@@ -387,9 +387,9 @@ console.log("Connected to mongodb. Got response from it.");
 
       console.log("\n" + tmprank + "\n");
 
-          var ws1 = fs.createWriteStream("results/"+cb_id+".json");
-          ws1.write(JSON.stringify(ranks));
-          ws1.end();
+      var ws1 = fs.createWriteStream("results/"+cb_id+".json");
+      ws1.write(JSON.stringify(ranks));
+      ws1.end();
 
     });
 
