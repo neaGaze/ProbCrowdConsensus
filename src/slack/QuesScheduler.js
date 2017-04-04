@@ -16,7 +16,7 @@ function QuesScheduler(param){
   this.usersToAsk = nconf.get('NUMBER_OF_USERS_TO_ASK');
   this.solvedProblemCount = 0;
   this.TOTAL_USERS = 0;
-  this.TIMEOUT_FOR_USER_TO_RESPOND = 20000;
+  this.TIMEOUT_FOR_USER_TO_RESPOND = nconf.get("TIMEOUT_INTERVAL");
   this.confidenceInterval = nconf.get("CONFIDENCE_INTERVAL");
   this.marginOfError = nconf.get("MARGIN_OF_ERROR");
   this.totalPopulation = 5;
@@ -270,6 +270,7 @@ QuesScheduler.prototype.timedOut = function(pair, user){
   * Start the countdown when the user is paired with a question
   *********************************************************************************************/
   QuesScheduler.prototype.startTimer = function(pair, user) {
+    console.log("The timeout will occur after " + self.TIMEOUT_FOR_USER_TO_RESPOND + " milli secs ");
     self.timers[user] = setTimeout(function() {
       console.log("** Countdown over. The question-user pair is broken so we find the new candidate to ask the question ** ");
       // clearTimeout(self.timers[user]);
