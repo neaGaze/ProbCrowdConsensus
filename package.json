@@ -10,5 +10,24 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "nigesh",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.1.2",
+    "body-parser": "^1.x.x",
+    "dateformat": "^1.0.12",
+    "express": "^4.x.x",
+    "mongoose": "^4.6.1",
+    "nconf": "0.8.4",
+    "request": "2.56.x",
+    "botkit" : "0.4.1",
+    "graphlib" : "^2.x.x",
+    "mathjs" : "^3.x.x",
+    "fs" : "0.0.1-security",
+    "path" : "^0.12.7",
+    "botkit" : "^0.5.0",
+    "request" : "^2.81.0",
+    "uuid" : "^3.0.1",
+    "js-combinatorics" : "^0.5.2",
+    "event-stream" : "^3.3.4"
+  }
 }

@@ -5,9 +5,6 @@ fs = require('fs'),
 util = require('util'),
 stream = require('stream')
 es = require('event-stream'),
-sha1 = require('sha1'),
-heapdump = require('heapdump'),
-readline = require('readline'),
 Combination = require("./Combination.js");
 
 var ENABLE_LOGGING = false;
