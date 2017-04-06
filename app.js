@@ -496,16 +496,20 @@ var help = function(bot, message, inChannel) {
 **************************************************************************************/
 var quesAskFramework = function(bot, message, cb_id, members) {
 
-  console.log("###### Error : multiple Ask Framke #####");
   CrowdConsensus.getResponses(cb_id, function(resp){
-    console.log("###### Error : getResponses error #####");
+
+    // reset the instance if previously stopped
+    if(QuesScheduler.getInstance() && QuesScheduler.getInstance().STOP_ASKING_QUESTION)
+       QuesScheduler.self = null;
+
     QuesScheduler.create(resp);
+      console.log(".....STOP_ASKING_QUESTION.... " + QuesScheduler.getInstance().STOP_ASKING_QUESTION);
     QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND = timeoutInterval;
     var popnCount = 0;
     console.log("size -> " + members.length);
     for(var member in members) {
-      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  //) {
-        && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  ) {
+      //  && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
           QuesScheduler.getInstance().activeUsers.push(members[member].id);
           popnCount++;
           console.log(members[member].name);
@@ -516,7 +520,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
 
       // Listener that is triggered when a question is paired with suitable candidates and ready to ask them question
       var getQuesUserPairListener = function(pair, uid){
-        console.log('**\n The paired users will now be asked questions \n**');
+        console.log('**\n The paired users will now be asked questions with uniqueTimeStamp: ' + pair.uniqueTimeStamp + '**\n');
 
         sampleSize = QuesScheduler.getInstance().minUserThreshold;
 
@@ -527,7 +531,6 @@ var quesAskFramework = function(bot, message, cb_id, members) {
             return;
           }
 
-console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
           convo.ask({
             delete_original : true,
             attachments:[
@@ -564,16 +567,12 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
               callback: function(reply, convo) {
                 var username = lookupUserNameFromId(reply.user);
                 console.log("The username is : " + reply.user + ", >");
-                console.log("received response with timestamp : " + reply.callback_id);
+                //console.log("received response with timestamp : " + reply.callback_id);
                 var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
                 if(!pr){
-                  console.log("\n////////// CHECK TIME STAMP/////////////");
                   convo.say("Please respond only to the latest question");
-                  for(var t in reply) console.log(t);
-
                 } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
-                  console.log("\n////////// ANSWER SAVED /////////////");
                   convo.say('You said  *' + pr.object1 +
                   '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
                   saveInDB(cb_id, reply.user, reply.user, pr, '&gt;');
@@ -587,17 +586,13 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
               callback: function(reply, convo) {
                 var username = lookupUserNameFromId(reply.user);
                 console.log("The username is : " + reply.user + ", <");
-                console.log("received response with timestamp : " + reply.callback_id);
+                //console.log("received response with timestamp : " + reply.callback_id);
                 var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
                 if(!pr){
-                  console.log("\n////////// CHECK TIME STAMP/////////////");
                   convo.say("Please respond only to the latest question");
-                  for(var t in reply) console.log(t);
-
                 } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
 
-                  console.log("\n////////// ANSWER SAVED /////////////");
                   convo.say('You said  *' + pr.object2 +
                   '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
                   saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
@@ -611,17 +606,13 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
               callback: function(reply, convo) {
                 var username = lookupUserNameFromId(reply.user);
                 console.log("The username is : " + reply.user + ", ~");
-                console.log("received response with timestamp : " + reply.callback_id);
+                //console.log("received response with timestamp : " + reply.callback_id);
                 var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
                 if(!pr){
-                   console.log("////////// CHECK TIME STAMP/////////////");
-                   convo.say("Please respond only to the latest question");
-                   for(var t in reply) console.log(t);
-
+                  convo.say("Please respond only to the latest question");
                 } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
 
-                  console.log("////////// ANSWER SAVED /////////////");
                   convo.say('You said  *' + pr.object2 +
                   '* is indifferent to *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
                   saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
@@ -732,8 +723,13 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
                   getUserInfo(bot, usersInChannel[i], function(detailUsersInfo){
                     detailUsersInfoList.push(detailUsersInfo);
                     console.log("detailUsersInfo -> " + detailUsersInfo.name + " and count: " + i)
-                    if(detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
+
+                    // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
+                    if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
                       quesAskFramework(bot, message, cb_id, detailUsersInfoList);
+                    } else {
+                      console.log("Most probably the QuesScheduler instance is not null");
+                      //bot.replyPrivate(message, "You need to close previous session of questions. Use \'stopall [id] command");
                     }
                   });
                 }
@@ -769,6 +765,41 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
       console.log("Now performing the 'helpme' operation");
       //  bot.replyPrivate(message, '<@' + message.user + '>' + " Don\'t worry I\'m here to help you. ");
       help(bot, message, true);
+
+    // Stop asking questions
+    } else if(message.command == "/stopall") {
+      if(message.text === "") {
+        bot.replyPrivate(message, '<@' + message.user + '>' + " You need to pass the id of the problem. Type '/helpme' if you need help");
+      } else if(parseInt(message.text)){
+        var num = parseInt(message.text);
+
+        if(QuesScheduler.getInstance()) {
+
+          QuesScheduler.getInstance().STOP_ASKING_QUESTION = true,
+          isFirstReply = true;
+
+          CrowdConsensus.findId(num, isFirstReply, function(cb_id){
+
+            CCModel.update({'_id' : cb_id}, {'$set' : {'responses' : []}}, function(err){
+              if(err) console.error(err);
+              else {
+                console.log("Deleted all entries");
+                CCReply.remove({parent_id : cb_id}, function(err){
+                  if(err) console.error(err);
+                  else console.log("Deleted all associated the replies");
+
+                  setTimeout(function(){QuesScheduler.destroy()}, (QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND + 2000));
+                  console.log("secs -> "+(QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2);
+                  bot.replyPrivate(message, 'OK all process will be stopped. Please wait for ' +
+                  ((QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2) + " secs before asking any questions again");
+                });
+              }
+            });
+          });
+        } else console.log("QuesScheduler instance is null");
+      } else {
+        bot.replyPrivate(message, '<@' + message.user +"> Please enter the valid integer parameter. Type '/helpme' if you need help");
+      }
     }
   });
 
@@ -815,18 +846,51 @@ console.log("Asking question with uniqueTimeStamp : " + pair.uniqueTimeStamp);
     help(bot, message, false);
   });
 
+
+  // Show the list of problems upon being asked for help
+  controller.hears(["halt (.*)"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+    var all_msg = message.match[0];
+    var idFromChat = all_msg.match(/\d+/);
+
+    if(idFromChat == null) bot.reply(message, "You need to add the number as well");
+    else if(false && QuesScheduler.getInstance()) {
+
+      QuesScheduler.getInstance().STOP_ASKING_QUESTION = true,
+      num = idFromChat[0], isFirstReply = true;
+
+      CrowdConsensus.findId(num, isFirstReply, function(cb_id){
+
+        CCModel.update({'_id' : cb_id}, {'$set' : {'responses' : []}}, function(err){
+          if(err) console.error(err);
+          else {
+
+            console.log("Deleted all entries");
+            CCReply.remove({parent_id : deleteKey}, function(err){
+              if(err) console.error(err);
+              else {
+                console.log("Deleted all associated the replies");
+                res.status(200).json({'text' : "All associated replies deleted", 'responseType' : 'in-channel',  'attachments': []});
+              }
+            });
+          }
+        });
+      });
+    } else console.log("QuesScheduler instance is null");
+  });
+
   // Deletes
   controller.hears(["Delete (.*)"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
     var all_msg = message.match[0];
     console.log("all msgs -> " + all_msg);
     var deleteKey = "58a625567957610aa34ee0f1";
-
+/*
     CCReply.remove({parent_id : deleteKey}, function(err){
       if(err) console.error(err);
       else{
         console.log("Deleted all the associated replies");
       }
     });
+    */
   });
 
   controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {

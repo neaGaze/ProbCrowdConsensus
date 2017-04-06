@@ -21,6 +21,7 @@ function QuesScheduler(param){
   this.confidenceInterval = nconf.get("CONFIDENCE_INTERVAL");
   this.marginOfError = nconf.get("MARGIN_OF_ERROR");
   this.totalPopulation = 5;
+  this.STOP_ASKING_QUESTION = false;
 };
 
 function create(param){
@@ -134,6 +135,8 @@ QuesScheduler.prototype.scheduleQues = function(){
 *********************************************************************************************/
 QuesScheduler.prototype.batchDispatchSchedule = function(){
 
+  // don't keep asking question if Stop sign is seen
+  if(self.STOP_ASKING_QUESTION) return;
 
   for(var q = 0; q < self.questionList.length; q++) {
     if(!self.questionList[q].isValid) continue;
