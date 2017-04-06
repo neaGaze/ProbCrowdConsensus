@@ -18,7 +18,7 @@ id=$4
 SUB_WORLD=$((WORLDS/iter))
 
 printf "%.*f\n" 0 $SUB_WORLD
-
+echo "cb_id: $id"
 for i in `seq -f "%.0f" 0 $SUB_WORLD $WORLDS`
 do
   START_INDEX="$i" SUBWORLD_SIZE="$SUB_WORLD_SIZE" iter="$iter" ID="$id" PORT=3002 node newapp.js >> output.log &

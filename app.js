@@ -656,6 +656,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
 
       // now pass the data to the algorithm through shell script
       var addr = (process.env.DEST_IP_ADDR) ? process.env.DEST_IP_ADDR : nconf.get("DEST_IP_ADDR");
+  console.log("123 cb_id: " + JSON.stringify(cb_id)+", OR "+cb_id);
       request({
         url: addr+'/pinger', //URL to hit
         method: 'POST',
