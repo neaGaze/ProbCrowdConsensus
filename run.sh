@@ -45,5 +45,5 @@ done
 #output_file_name="results/$WORLDS.json"
 #tail -2 output.log | head -1 > "$output_file_name"
 output_file_name="results/$id.json"
-RESULT="output_file_name" node runner.js
+RESULT="output_file_name" CB_ID="$id" node runner.js
 [ -f run.sha ] && echo "Found" || echo "Not found"

@@ -48,6 +48,8 @@ if(process.env.RESULT) {
     var file = fs.readFileSync(process.env.RESULT);
     console.log("file -> " + file);
     var resJson = JSON.parse(file);
+    resJson.cb_id = process.env.CB_ID;
+
     request({
       url: nconf.get("HOST_IP_ADDR")+'/getResults', //URL to hit
       method: 'POST',
