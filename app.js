@@ -55,6 +55,8 @@ app.get('/', function (req, res) {
   res.status(200).send('Welcome to CrowdConsensus-II with Probability!\n');
 });
 
+console.log("CLIENT_ID : " + process.env.CLIENT_ID+"\n");
+
 /******************************************************************************************************
 * Save the aggregated result into CrowdConsensus module
 **************************************************************************************************/
