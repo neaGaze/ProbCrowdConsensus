@@ -28,6 +28,7 @@
     "request" : "^2.81.0",
     "uuid" : "^3.0.1",
     "js-combinatorics" : "^0.5.2",
-    "event-stream" : "^3.3.4"
+    "event-stream" : "^3.3.4",
+    "tree-node" : "^0.2.3"
   }
 }
