@@ -508,8 +508,8 @@ var quesAskFramework = function(bot, message, cb_id, members) {
     var popnCount = 0;
     console.log("size -> " + members.length);
     for(var member in members) {
-      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  ) {
-        //  && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  //) {
+          && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
         QuesScheduler.getInstance().activeUsers.push(members[member].id);
         popnCount++;
         console.log(members[member].name);

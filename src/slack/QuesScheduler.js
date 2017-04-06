@@ -56,6 +56,7 @@ QuesScheduler.prototype.generateSampleSize = function(callback) {
       if(sample)
          sample = math.ceil(sample);
        else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
+       sample = 1;
       console.log("sample size: " + sample);
       callback(sample);
   });
