@@ -2,6 +2,7 @@ var util = require('util'),
 nconf = require('nconf'),
 math = require('mathjs'),
 fs = require('fs'),
+uuid = require('uuid/v1'),
 Combination = require("../algo/Combination.js"),
 EventEmitter = require('events').EventEmitter;
 
@@ -102,10 +103,11 @@ QuesScheduler.prototype.scheduleQues = function(){
     // Initialization of Question - to - User pairing
     for(var q = 0; q < self.questionList.length; q++) {
 
+      self.questionList[q].uniqueTimeStamp = uuid();//Date.now() + ""; //create a new unique timestamp
       self.questionList[q].candidates = [];
       self.questionList[q].hasAnsweredList = [];
       self.questionList[q].isValid = true;  //to check if the question has already enough sample users, false if sample sufficient
-      console.log("min thres: " + self.minUserThreshold);
+      //console.log("min thres: " + self.minUserThreshold);
       if(self.activeUsers.length > 0) {
 
         for(var r = 0; r < self.minUserThreshold; r++) {
@@ -136,6 +138,7 @@ QuesScheduler.prototype.batchDispatchSchedule = function(){
   for(var q = 0; q < self.questionList.length; q++) {
     if(!self.questionList[q].isValid) continue;
 
+    self.questionList[q].uniqueTimeStamp = uuid(); //Date.now() + "";
     var leftUsers = self.minUserThreshold - self.questionList[q].hasAnsweredList.length;
     var rand = -1, user = null;
 
@@ -183,6 +186,7 @@ QuesScheduler.prototype.reSchedule = function(index){
   var leftUsers = self.minUserThreshold - self.questionList[index].hasAnsweredList.length;
   var rand, user;
 
+  self.questionList[index].uniqueTimeStamp = uuid();//Date.now();
   if(self.activeUsers.length > 0) {
     rand =  Math.floor(Math.random() * (self.activeUsers.length - 0) + 0);
     // user =  self.activeUsers.pop();
@@ -218,15 +222,18 @@ QuesScheduler.prototype.reSchedule = function(index){
 /********************************************************************************************
 * called when a question-User pair is timed out becuase user never responeded
 *********************************************************************************************/
-QuesScheduler.prototype.timedOut = function(pair, user){
+QuesScheduler.prototype.timedOut = function(uniqueId, user){
 
   var index;
   // readdress the user to the pool of available users
+  //console.log("\nBefore shuffle:"); console.log(JSON.stringify(self.questionList));
   self.questionList = shuffle(self.questionList);
+  //console.log("After shuffle:"); console.log(JSON.stringify(self.questionList));
+  //console.log("ts: " + uniqueId+ ", user : "+user+"\n");
+
   for(var i = 0; i < self.questionList.length; i++) {
-    if(self.questionList[i].object1 == pair.object1 &&
-      self.questionList[i].object2 == pair.object2 &&
-      self.questionList[i].criterion == pair.criterion) {
+
+    if(self.questionList[i].uniqueTimeStamp == uniqueId) {
 
         var index = self.questionList[i].candidates.indexOf(user);
         if(index > -1) self.questionList[i].candidates.splice(index, 1);
@@ -246,11 +253,11 @@ QuesScheduler.prototype.timedOut = function(pair, user){
   /********************************************************************************************
   * called when a question is answered by the user
   *********************************************************************************************/
-  QuesScheduler.prototype.answerRecorded = function(pair, user){
+  QuesScheduler.prototype.answerRecorded = function(uniqueId, user){
     console.log("______1. Here the answer is recorded_____ " + self.activeUsers.length);
 
     // replenish the available users pool and nullify the timer
-    var index = QuesScheduler.prototype.timedOut.call(this, pair, user);
+    var index = QuesScheduler.prototype.timedOut.call(this, uniqueId.split(":")[0], user);
     if(index < 0) return false;
 
     // record the user to the answered list of the question
@@ -269,17 +276,29 @@ QuesScheduler.prototype.timedOut = function(pair, user){
   /********************************************************************************************
   * Start the countdown when the user is paired with a question
   *********************************************************************************************/
-  QuesScheduler.prototype.startTimer = function(pair, user) {
+  QuesScheduler.prototype.startTimer = function(ts, user) {
     console.log("The timeout will occur after " + self.TIMEOUT_FOR_USER_TO_RESPOND + " milli secs ");
     self.timers[user] = setTimeout(function() {
       console.log("** Countdown over. The question-user pair is broken so we find the new candidate to ask the question ** ");
       // clearTimeout(self.timers[user]);
-      var index = QuesScheduler.prototype.timedOut.call(this, pair, user);
+      var index = QuesScheduler.prototype.timedOut.call(this, ts, user);
       // QuesScheduler.prototype.reSchedule.call(this, index);
       if(self.activeUsers.length == self.TOTAL_USERS)
       QuesScheduler.prototype.batchDispatchSchedule(this);
 
     }, self.TIMEOUT_FOR_USER_TO_RESPOND);
+  }
+
+
+  /********************************************************************************************
+  * Check the timestamp
+  *********************************************************************************************/
+  QuesScheduler.prototype.checkTimeStamp = function(ts){
+    var ts_minus_user = ts.split(":")[0];
+    for(var i = 0; i < self.questionList.length; i++) {
+      if(self.questionList[i].uniqueTimeStamp == ts_minus_user) return self.questionList[i];
+    }
+    return null;
   }
 
   module.exports = QuesScheduler;
