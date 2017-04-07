@@ -508,8 +508,8 @@ var quesAskFramework = function(bot, message, cb_id, members) {
     var popnCount = 0;
     console.log("size -> " + members.length);
     for(var member in members) {
-      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  //) {
-          && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  ) {
+      //    && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
         QuesScheduler.getInstance().activeUsers.push(members[member].id);
         popnCount++;
         console.log(members[member].name);
@@ -646,6 +646,9 @@ var quesAskFramework = function(bot, message, cb_id, members) {
     QuesScheduler.getInstance().on('problem_finish', function(a){
       console.log("__________THE PROBLEM IS FINISHED_____________");
 
+      var realID = JSON.stringify(cb_id);
+      realID = realID.slice(1,-1);
+
       var totalWorld = math.pow(3, QuesScheduler.getInstance().questionList.length);
       var chunkSize = totalWorld, iter = 1;
       while(chunkSize > 400000) {
@@ -660,7 +663,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
         url: addr+'/pinger', //URL to hit
         method: 'POST',
         //Lets post the following key/values as form
-        form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id+""}
+        form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : realID}
       }, function(error, response, body){
         if(error) {
           console.log(error);

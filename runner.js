@@ -16,6 +16,15 @@ nconf.argv()
 .env()
 .file({ file: __dirname + '/config.json' });
 
+var mongodb_url = nconf.get('CROWD_CONSENSUS_MONGO_URL');
+
+// Connect mongodb
+mongoose.Promise = global.Promise;
+mongoose.connect(mongodb_url, function (error) {
+  if (error) console.error(error);
+  else console.log('mongo connected');
+});
+
 var app = express();
 
 // body parser middleware
@@ -29,7 +38,6 @@ app.post('/pinger', function (req, res) {
   chunkSize = req.body.chunkSize,
   iter = req.body.iter,
   cb_id = req.body.cb_id;
-  console.log("Yum +++ " + JSON.stringify(cb_id));
   console.log("-> " + totalWorld +", " + chunkSize + ", " + iter + ", "+cb_id);
 
   var ls = child_process.spawn("./run.sh", [totalWorld, chunkSize, iter, cb_id], {shell : true});
