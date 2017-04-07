@@ -932,6 +932,7 @@ controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambi
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
       CrowdConsensus.getResponses(cb_id, function(resp){
         var newCBID =JSON.stringify(cb_id);
+        newCBID = newCBID.slice(1,-1);
         console.log("____Voila mongo connected as "+cb_id + ", and "+newCBID);
 
         // test for sending post request
