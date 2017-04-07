@@ -29,6 +29,7 @@ app.post('/pinger', function (req, res) {
   chunkSize = req.body.chunkSize,
   iter = req.body.iter,
   cb_id = req.body.cb_id;
+  console.log("Yum +++ " + JSON.stringify(cb_id));
   console.log("-> " + totalWorld +", " + chunkSize + ", " + iter + ", "+cb_id);
 
   var ls = child_process.spawn("./run.sh", [totalWorld, chunkSize, iter, cb_id], {shell : true});

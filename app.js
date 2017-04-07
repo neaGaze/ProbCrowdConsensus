@@ -931,7 +931,8 @@ controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambi
     var num = idFromChat[0], isFirstReply = true;
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
       CrowdConsensus.getResponses(cb_id, function(resp){
-        console.log("____Voila mongo connected as "+cb_id);
+        var newCBID =JSON.stringify(cb_id);
+        console.log("____Voila mongo connected as "+cb_id + ", and "+newCBID);
 
         // test for sending post request
         // Configure the request
@@ -953,7 +954,7 @@ controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambi
             'User-Agent': 'me'
           },
           //Lets post the following key/values as form
-          form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id}
+          form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : newCBID}
         }, function(error, response, body){
           if(error) {
             console.log(error);
