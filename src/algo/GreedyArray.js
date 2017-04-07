@@ -63,6 +63,8 @@ var findPOptimal = function(paretoOptimalCand, objects, criteria){
 
 var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
 
+for(var u in cb_id) console.log(u+", "+cb_id[u]);
+
   console.log("The cb_id: " + cb_id);
   CrowdConsensus.getResponses(cb_id, function(resp){
     //var resp = JSON.parse(cb_id);

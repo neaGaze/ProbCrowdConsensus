@@ -656,12 +656,11 @@ var quesAskFramework = function(bot, message, cb_id, members) {
 
       // now pass the data to the algorithm through shell script
       var addr = (process.env.DEST_IP_ADDR) ? process.env.DEST_IP_ADDR : nconf.get("DEST_IP_ADDR");
-  console.log("123 cb_id: " + JSON.stringify(cb_id)+", OR "+cb_id);
       request({
         url: addr+'/pinger', //URL to hit
         method: 'POST',
         //Lets post the following key/values as form
-        form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id}
+        form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id+""}
       }, function(error, response, body){
         if(error) {
           console.log(error);
@@ -921,37 +920,48 @@ controller.hears(["Delete (.*)"],["direct_message","direct_mention","mention","a
 */
 });
 
-controller.hears(["exit"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
   console.log("Now exit the program bro...");
 
-  CrowdConsensus.getResponses("58a621fbb55671064acee0f1", function(resp){
-    console.log("____Voila mongo connected");
+  var all_msg = message.match[0];
+  var idFromChat = all_msg.match(/\d+/);
 
-    // test for sending post request
-    // Configure the request
-    var totalWorld = math.pow(3, 12);
-    var chunkSize = totalWorld, iter = 1;
-    while(chunkSize > 400000) {
-      chunkSize = chunkSize / 10;
-      chunkSize = chunkSize >> 0;  // convert into integer
-      iter *= 10;
-    }
-    //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
+  if(idFromChat == null) bot.reply(message, "You need to add the number as well");
+  else {
+    var num = idFromChat[0], isFirstReply = true;
+    CrowdConsensus.findId(num, isFirstReply, function(cb_id){
+      CrowdConsensus.getResponses(cb_id, function(resp){
+        console.log("____Voila mongo connected");
 
-    request({
-      url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
-      method: 'POST',
-      //Lets post the following key/values as form
-      form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbb55671064acee0f1"}
-    }, function(error, response, body){
-      if(error) {
-        console.log(error);
-      } else {
-        console.log(response.statusCode, body);
-      }
+        // test for sending post request
+        // Configure the request
+        var totalWorld = math.pow(3, 12);
+        var chunkSize = totalWorld, iter = 1;
+        while(chunkSize > 400000) {
+          chunkSize = chunkSize / 10;
+          chunkSize = chunkSize >> 0;  // convert into integer
+          iter *= 10;
+        }
+        //request.post('http://192.168.0.11:3001/pinger').form({totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : "58a621fbbe5761064ace4444"});
+
+        request({
+          url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
+          method: 'POST',
+          //Lets post the following key/values as form
+          form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id}
+        }, function(error, response, body){
+          if(error) {
+            console.log(error);
+          } else {
+            console.log(response.statusCode, body);
+          }
+        });
+
+      });
     });
+  }
 
-  });
+
   // process.exit(1);
 });
 

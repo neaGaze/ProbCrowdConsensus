@@ -35,7 +35,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
+console.log("Now reading " + process.env.ID+", " +process.env.START_INDEX +", "+ process.env.SUBWORLD_SIZE+", "+ process.env.iter);
 
 startTime = new Date().getTime();
 var gree = new GreedyArray(process.env.ID, process.env.START_INDEX, process.env.SUBWORLD_SIZE, process.env.iter);

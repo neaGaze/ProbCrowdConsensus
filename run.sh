@@ -19,7 +19,7 @@ SUB_WORLD=$((WORLDS/iter))
 
 printf "%.*f\n" 0 $SUB_WORLD
 echo "cb_id: $id"
-for i in `seq -f "%.0f" 0 $SUB_WORLD $WORLDS`
+for i in `seq -f "%.0f" 0 $SUB_WORLD $((WORLDS-1))`
 do
   START_INDEX="$i" SUBWORLD_SIZE="$SUB_WORLD_SIZE" iter="$iter" ID="$id" PORT=3002 node newapp.js >> output.log &
   actualNumber=$(echo $((i/SUB_WORLD_SIZE)) | awk '{ print sprintf("%.9f", $1); }')
@@ -35,7 +35,7 @@ do
   cat "data/$i.dat" >> data/the_new_0.dat
 
   killall -9 node
-  #if [$count -eq 2]
+  #if [$iter -eq 1]
   #then
   #  break
   #fi
@@ -45,5 +45,6 @@ done
 #output_file_name="results/$WORLDS.json"
 #tail -2 output.log | head -1 > "$output_file_name"
 output_file_name="results/$id.json"
-RESULT="output_file_name" CB_ID="$id" node runner.js
+RESULT="$output_file_name" CB_ID="$id" node runner.js >> output.log &
+lt --port=3001 --subdomain testapp &
 [ -f run.sha ] && echo "Found" || echo "Not found"
