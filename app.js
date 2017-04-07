@@ -509,7 +509,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
     console.log("size -> " + members.length);
     for(var member in members) {
       if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  ) {
-      //    && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
+        //    && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/)) {
         QuesScheduler.getInstance().activeUsers.push(members[member].id);
         popnCount++;
         console.log(members[member].name);
@@ -710,35 +710,60 @@ controller.on('slash_command',function(bot,message) {
       } catch(ex){
         console.error("Error converting text");
       }
-
+      console.log("Channel name: " + message.channel);
       if(problemId) {
         CrowdConsensus.findId(problemId, true, function(cb_id){
 
-          bot.api.channels.info({channel : message.channel}, function(err, res){
-            if(err) {
-              console.log("Failed to read channels : " + err);
-              bot.reply("Sorry", 'Sorry, there has been an error: '+err);
+          var lookAtChannel = true, lookAtGroup = false;
+
+          // a function that triggers the questions. The variable 'membs' can either be the channel members or group members
+          var starter = function(membs){
+            var usersInChannel = membs;
+            var detailUsersInfoList = [];
+            for(var i = 0; i < usersInChannel.length; i++) {
+              getUserInfo(bot, usersInChannel[i], function(detailUsersInfo){
+                detailUsersInfoList.push(detailUsersInfo);
+                console.log("detailUsersInfo -> " + detailUsersInfo.name + " and count: " + i)
+
+                // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
+                if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
+                  quesAskFramework(bot, message, cb_id, detailUsersInfoList);
+                } else {
+                  console.log("Most probably the QuesScheduler instance is not null");
+                  //bot.replyPrivate(message, "You need to close previous session of questions. Use \'stopall [id] command");
+                }
+              });
             }
+          };
 
-            if(!err) {
-              var usersInChannel = res.channel.members;
-              var detailUsersInfoList = [];
-              for(var i = 0; i < usersInChannel.length; i++) {
-                getUserInfo(bot, usersInChannel[i], function(detailUsersInfo){
-                  detailUsersInfoList.push(detailUsersInfo);
-                  console.log("detailUsersInfo -> " + detailUsersInfo.name + " and count: " + i)
+          if(lookAtChannel) {
+            bot.api.channels.info({channel : message.channel}, function(err, res){
+              if(err) {
+                console.log("Failed to read channels : " + err);
+                lookAtChannel = false; lookAtGroup = true;
+              }
 
-                  // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
-                  if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
-                    quesAskFramework(bot, message, cb_id, detailUsersInfoList);
-                  } else {
-                    console.log("Most probably the QuesScheduler instance is not null");
-                    //bot.replyPrivate(message, "You need to close previous session of questions. Use \'stopall [id] command");
+              if(lookAtGroup) {
+                bot.api.groups.info({channel : message.channel}, function(err1, res1){
+                  if(err1) {
+                    console.log("Failed to read that group :" + err1 +" with id: " + message.channel);
+                    lookAtGroup = false, lookAtChannel = false;
+                    bot.reply("Sorry", 'Sorry, there has been an error. We couldnot find that channel '+err);
+                  }
+
+                  if(!err1) {
+                    console.log("Should be asking question to a group");
+                    starter(res1.group.members);
                   }
                 });
               }
-            }
-          });
+
+              if(!err) {
+                console.log("Should be asking question to a channel");
+                starter(res.channel.members);
+              }
+            });
+          }
         });
 
         bot.replyPrivate(message, "Please take a look at the message sent by the bot");
