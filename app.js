@@ -931,7 +931,7 @@ controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambi
     var num = idFromChat[0], isFirstReply = true;
     CrowdConsensus.findId(num, isFirstReply, function(cb_id){
       CrowdConsensus.getResponses(cb_id, function(resp){
-        console.log("____Voila mongo connected");
+        console.log("____Voila mongo connected as "+cb_id);
 
         // test for sending post request
         // Configure the request
@@ -947,6 +947,11 @@ controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambi
         request({
           url: nconf.get("DEST_IP_ADDR")+'/pinger', //URL to hit
           method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Accept-Charset': 'utf-8',
+            'User-Agent': 'me'
+          },
           //Lets post the following key/values as form
           form: {totalWorld : totalWorld, chunkSize : chunkSize, iter : iter, cb_id : cb_id}
         }, function(error, response, body){
