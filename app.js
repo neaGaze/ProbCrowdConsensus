@@ -571,7 +571,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
               var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
               if(!pr){
-                convo.say("Please respond only to the latest question");
+                convo.say("Sorry your response to this question was timed out");
               } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
                 convo.say('You said  *' + pr.object1 +
                 '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
@@ -590,7 +590,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
               var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
               if(!pr){
-                convo.say("Please respond only to the latest question");
+                convo.say("Sorry your response to this question was timed out");
               } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
 
                 convo.say('You said  *' + pr.object2 +
@@ -610,7 +610,7 @@ var quesAskFramework = function(bot, message, cb_id, members) {
               var pr = QuesScheduler.getInstance().checkTimeStamp(reply.callback_id);
 
               if(!pr){
-                convo.say("Please respond only to the latest question");
+                convo.say("Sorry your response to this question was timed out");
               } else if(QuesScheduler.getInstance().answerRecorded(reply.callback_id, reply.user)) {
 
                 convo.say('You said  *' + pr.object2 +

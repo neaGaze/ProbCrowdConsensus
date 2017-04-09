@@ -46,18 +46,18 @@ var getInstance = function(){
 ***************************************************************************************************/
 QuesScheduler.prototype.generateSampleSize = function(callback) {
   fs.readFile(__dirname+'/../../var/t-table.json', 'utf8', function(err, data){
-      if (err) throw err;
-      var ttable = JSON.parse(data);
-      // assuming p = 1/3 or conservative guess
-      var normalizedConfidenceLevel = math.round(((1 - self.confidenceInterval) / 2) * 1000) / 1000;
-      console.log("popn: " + self.totalPopulation);
-      var m = math.square(ttable[self.totalPopulation+""][normalizedConfidenceLevel+""] / self.marginOfError) * 0.222;
-      var sample = (self.totalPopulation * m) / (self.totalPopulation - 1 + m);
-      if(sample)
-         sample = math.ceil(sample);
-       else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
-      console.log("sample size: " + sample);
-      callback(sample);
+    if (err) throw err;
+    var ttable = JSON.parse(data);
+    // assuming p = 1/3 or conservative guess
+    var normalizedConfidenceLevel = math.round(((1 - self.confidenceInterval) / 2) * 1000) / 1000;
+    console.log("popn: " + self.totalPopulation);
+    var m = math.square(ttable[self.totalPopulation+""][normalizedConfidenceLevel+""] / self.marginOfError) * 0.222;
+    var sample = (self.totalPopulation * m) / (self.totalPopulation - 1 + m);
+    if(sample)
+    sample = math.ceil(sample);
+    else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
+    console.log("sample size: " + sample);
+    callback(sample);
   });
 
 }
@@ -238,73 +238,72 @@ QuesScheduler.prototype.timedOut = function(uniqueId, user){
 
     if(self.questionList[i].uniqueTimeStamp == uniqueId) {
 
-        var index = self.questionList[i].candidates.indexOf(user);
-        if(index > -1) self.questionList[i].candidates.splice(index, 1);
-        else return -1;
+      var index = self.questionList[i].candidates.indexOf(user);
+      if(index > -1) self.questionList[i].candidates.splice(index, 1);
+      else return -1;
 
-        self.activeUsers.push(user);
-        index = i;
+      self.activeUsers.push(user);
+      index = i;
 
-        clearTimeout(self.timers[user]);
-        self.timers[user] = null;
-        break;
-      }
+      clearTimeout(self.timers[user]);
+      self.timers[user] = null;
+      break;
     }
-    return index;
-  };
+  }
+  return index;
+};
 
-  /********************************************************************************************
-  * called when a question is answered by the user
-  *********************************************************************************************/
-  QuesScheduler.prototype.answerRecorded = function(uniqueId, user){
-    console.log("______1. Here the answer is recorded_____ " + self.activeUsers.length);
+/********************************************************************************************
+* called when a question is answered by the user
+*********************************************************************************************/
+QuesScheduler.prototype.answerRecorded = function(uniqueId, user){
+  console.log("______1. Here the answer is recorded_____ " + self.activeUsers.length);
 
-    // replenish the available users pool and nullify the timer
-    var index = QuesScheduler.prototype.timedOut.call(this, uniqueId.split(":")[0], user);
-    if(index < 0) return false;
+  // replenish the available users pool and nullify the timer
+  var index = QuesScheduler.prototype.timedOut.call(this, uniqueId.split(":")[0], user);
+  if(index < 0) return false;
 
-    // record the user to the answered list of the question
-    self.questionList[index].hasAnsweredList.push(user);
+  // record the user to the answered list of the question
+  self.questionList[index].hasAnsweredList.push(user);
 
-    // now re-schedule the user to another question if the minimum sample size of users for this question isn't yet satisfied
+  // now re-schedule the user to another question if the minimum sample size of users for this question isn't yet satisfied
+  if(self.activeUsers.length == self.TOTAL_USERS)
+  QuesScheduler.prototype.batchDispatchSchedule(this);
+  //QuesScheduler.prototype.reSchedule.call(this, index);
+
+  return true;
+};
+
+
+
+/********************************************************************************************
+* Start the countdown when the user is paired with a question
+*********************************************************************************************/
+QuesScheduler.prototype.startTimer = function(ts, user) {
+  console.log("The timeout will occur after " + self.TIMEOUT_FOR_USER_TO_RESPOND + " milli secs ");
+  self.timers[user] = setTimeout(function() {
+    console.log("** Countdown over. The question-user pair is broken so we find the new candidate to ask the question ** ");
+    // clearTimeout(self.timers[user]);
+    var index = QuesScheduler.prototype.timedOut.call(this, ts, user);
+    // QuesScheduler.prototype.reSchedule.call(this, index);
     if(self.activeUsers.length == self.TOTAL_USERS)
     QuesScheduler.prototype.batchDispatchSchedule(this);
-    //QuesScheduler.prototype.reSchedule.call(this, index);
 
-    return true;
-  };
+  }, self.TIMEOUT_FOR_USER_TO_RESPOND);
+}
 
-
-
-  /********************************************************************************************
-  * Start the countdown when the user is paired with a question
-  *********************************************************************************************/
-  QuesScheduler.prototype.startTimer = function(ts, user) {
-    console.log("The timeout will occur after " + self.TIMEOUT_FOR_USER_TO_RESPOND + " milli secs ");
-    self.timers[user] = setTimeout(function() {
-      console.log("** Countdown over. The question-user pair is broken so we find the new candidate to ask the question ** ");
-      // clearTimeout(self.timers[user]);
-      var index = QuesScheduler.prototype.timedOut.call(this, ts, user);
-      // QuesScheduler.prototype.reSchedule.call(this, index);
-      if(self.activeUsers.length == self.TOTAL_USERS)
-      QuesScheduler.prototype.batchDispatchSchedule(this);
-
-    }, self.TIMEOUT_FOR_USER_TO_RESPOND);
+/********************************************************************************************
+* Check the timestamp
+*********************************************************************************************/
+QuesScheduler.prototype.checkTimeStamp = function(ts){
+  var ts_minus_user = ts.split(":")[0];
+  for(var i = 0; i < self.questionList.length; i++) {
+    if(self.questionList[i].uniqueTimeStamp == ts_minus_user) return self.questionList[i];
   }
+  return null;
+}
 
-
-  /********************************************************************************************
-  * Check the timestamp
-  *********************************************************************************************/
-  QuesScheduler.prototype.checkTimeStamp = function(ts){
-    var ts_minus_user = ts.split(":")[0];
-    for(var i = 0; i < self.questionList.length; i++) {
-      if(self.questionList[i].uniqueTimeStamp == ts_minus_user) return self.questionList[i];
-    }
-    return null;
-  }
-
-  module.exports = QuesScheduler;
-  module.exports.create = create;
-  module.exports.destroy = destroy;
-  module.exports.getInstance = getInstance;
+module.exports = QuesScheduler;
+module.exports.create = create;
+module.exports.destroy = destroy;
+module.exports.getInstance = getInstance;
