@@ -22,7 +22,7 @@ do
   echo "rank page: $filename"
 
   while [ ! -f "$filename" ]; do
-    sleep 5
+    sleep 3
     echo "Still waiting"
   done
 

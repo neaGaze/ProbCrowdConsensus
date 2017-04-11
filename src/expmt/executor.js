@@ -131,52 +131,20 @@ var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
       longStr = "",
       fileName = ""+objects.toString()+","+criteria.toString()+"",
       chunkNumber = subWorldSize, oldRankFile,
-      oldFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
+      oldFileName = __dirname+'/ranks_'+((startIndex / chunkNumber) - 1)+".json";
 
       // loop through all the possible worlds
       var subWorldLength = math.round(baseN.length);
 
-      for(var ind = startIndex; ind < subWorldLength; ind++) {
+      startIndex = parseInt(startIndex, 10);
+      var abc = parseInt(process.env.SUBWORLD_SIZE, 10) + startIndex;
+      var z;
 
-        // take the snapshot of the progress
-        if((ind % (math.round((baseN.length - 1) / iter)) == 0 && ind > startIndex) || (ind == subWorldLength - 1)) {
-          var cnter = 0;
-          for(var jk in dict)
-          if(dict.hasOwnProperty(jk)) cnter++;
-          console.log("Progress: " + math.round(((ind * 100) / baseN.length)) +"% ...." + " @"+ind);
+      for(z = startIndex; z < abc; z++){
+        // stop the loop when the last element is reached
+        if(z >= subWorldLength - 1)  break;
 
-          // save the intermediate data into files
-          var wstream = fs.createWriteStream(__dirname+"/data/"+startIndex+".dat", {'flags': 'a', 'encoding': null, 'mode': 0666});
-          wstream.write(longStr);
-          wstream.end();
-
-          if(startIndex > 0) {
-            var oFileName = 'ranks_'+((startIndex / chunkNumber) - 1)+".json";
-            oldRankFile = fs.readFileSync(oFileName);
-            var oldDict;
-            if(oldRankFile){
-              try{
-                oldDict = JSON.parse(oldRankFile);
-              } catch(e){
-                console.log("Invalid JSON file :(");
-                break;
-              }
-            } else {
-              console.log("Looks like something tampered with the file and now its empty :(");
-              break;
-            }
-            dict = mergeObject(dict, oldDict);
-            fs.unlink(oFileName, function(err){});
-          }
-
-          var wstrm = fs.createWriteStream(__dirname+"/ranks_"+(startIndex / chunkNumber)+".json");
-          wstrm.write(JSON.stringify(dict));
-          wstrm.end();
-
-          break;
-        }
-
-        var a = baseN.nth(ind);
+        var a = baseN.nth(z);
         var world = [];
         var dominanceCountDict = {}, paretoOptimalCand = [];
 
@@ -357,7 +325,35 @@ var GreedyArray = function(cb_id, startIndex, subWorldSize, iter){
           }
 
           count++;
-        };
+        }
+        // write a progress snapshot
+        console.log("Progress: " + math.round(((z * 100) / baseN.length)) +"% ...." + " @"+z);
+
+        // save the intermediate data into files
+        var wstream = fs.createWriteStream(__dirname+"/data/"+startIndex+".dat", {'flags': 'a', 'encoding': null, 'mode': 0666});
+        wstream.write(longStr);
+        wstream.end();
+
+        if(startIndex > 0) {
+          var oFileName = __dirname + '/ranks_'+((startIndex / chunkNumber) - 1)+".json";
+          oldRankFile = fs.readFileSync(oFileName);
+          var oldDict;
+          if(oldRankFile){
+            try{
+              oldDict = JSON.parse(oldRankFile);
+            } catch(e){
+              console.log("Invalid JSON file :(");
+            }
+          } else {
+            console.log("Looks like something tampered with the file and now its empty :(");
+          }
+          dict = mergeObject(dict, oldDict);
+          fs.unlink(oFileName, function(err){});
+        }
+
+        var wstrm = fs.createWriteStream(__dirname+"/ranks_"+(startIndex / chunkNumber)+".json");
+        wstrm.write(JSON.stringify(dict));
+        wstrm.end();
 
         console.log('--------------------------');
         console.log(' 0 prob world count : ' + zeroWorldCount);
