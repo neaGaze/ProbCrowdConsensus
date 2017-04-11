@@ -494,7 +494,7 @@ var help = function(bot, message, inChannel) {
 /************************************************************************************
 * The general Framework for Asking questions to the users
 **************************************************************************************/
-var quesAskFramework = function(bot, message, cb_id, members) {
+var quesAskFramework = function(bot, message, cb_id, members, channelId) {
 
   CrowdConsensus.getResponses(cb_id, function(resp){
 
@@ -673,6 +673,12 @@ var quesAskFramework = function(bot, message, cb_id, members) {
       });
 
       setTimeout(function(){QuesScheduler.destroy();}, 10000); // This wait time is there to allow writing the final input into mongodb
+
+      // Tell the user that the task is done
+      if(channelId)
+      bot.api.chat.postMessage({channel : channelId, text : "The task is finished. Thank you for your response"}, function(err3, res2) {
+        if(err3) console.log(""+err3);
+      });
     });
 
     if(popnCount > 0)
@@ -727,7 +733,7 @@ controller.on('slash_command',function(bot,message) {
 
                 // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
                 if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
-                  quesAskFramework(bot, message, cb_id, detailUsersInfoList);
+                  quesAskFramework(bot, message, cb_id, detailUsersInfoList, message.channel);
                 } else {
                   console.log("Most probably the QuesScheduler instance is not null");
                   //bot.replyPrivate(message, "You need to close previous session of questions. Use \'stopall [id] command");
@@ -889,7 +895,7 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
         }
 
         if(!err) {
-          quesAskFramework(bot, message, cb_id, res.members);
+          quesAskFramework(bot, message, cb_id, res.members, message.channel);
         }
       });
     });
@@ -946,6 +952,7 @@ controller.hears(["Delete (.*)"],["direct_message","direct_mention","mention","a
 }
 });
 */
+bot.api.chat.postMessage({channel : message.channel, text : "Yo doug! Waasup?"+message.channel});
 });
 
 controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {

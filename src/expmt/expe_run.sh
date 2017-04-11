@@ -12,6 +12,7 @@ inputFName=$4
 
 SUB_WORLD=$((WORLDS/iter))
 
+startDate=$date
 printf "%.*f\n" 0 $SUB_WORLD
 for i in `seq -f "%.0f" 0 $SUB_WORLD $((WORLDS-1))`
 do
@@ -22,7 +23,7 @@ do
   echo "rank page: $filename"
 
   while [ ! -f "$filename" ]; do
-    sleep 3
+    sleep 20
     echo "Still waiting"
   done
 
@@ -30,3 +31,7 @@ do
 
   killall -9 node
 done
+
+endDate=$date
+diff=$endDate-$startDate
+echo "$diff" >> timer.txt

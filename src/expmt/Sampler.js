@@ -85,8 +85,8 @@ function findConfidenceInterval(n, p_gt, p_lt, p_indiff){
 }
 
 function Sampler(){
-  var parent_cb_id = "58a621fbbe5761064acee0f1";   // We use the same cb_id to sample its subset problems
-  var sampObjSize = 3;  // minimum objects = 2
+  var parent_cb_id = "58a621fbb55671064acee0f1";   // We use the same cb_id to sample its subset problems
+  var sampObjSize = 4;  // minimum objects = 2
   var sampCritSize = 2;  // minimum criteria = 1
   var THRESHOLD = nconf.get("THRESHOLD_FOR_CI"); // threshold margin for selecting our desired confidence interval
 
