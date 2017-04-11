@@ -14,6 +14,7 @@ CrowdCnsusModule = require(__dirname + '/src/db/CrowdCnsusModule.js'),
 CrowdConsensus = require(__dirname + "/src/db/CrowdConsensus.js"),
 QuesInquirer = require(__dirname + "/src/slack/QuesInquirer.js"),
 QuesScheduler = require(__dirname + "/src/slack/QuesScheduler.js"),
+ExhaustiveScheduler = require(__dirname + "/src/slack/ExhaustiveScheduler.js"),
 async = require('async'),
 GreedyApproach = require(__dirname + "/src/algo/GreedyApproach.js"),
 GreedyArrayFile = require(__dirname + "/src/algo/GreedyArrayFile.js"),
@@ -42,6 +43,7 @@ var greedy;
 var startTime, endTime;
 var sampleSize = nconf.get("NUMBER_OF_USERS_TO_ASK");
 var timeoutInterval = nconf.get("TIMEOUT_INTERVAL");
+var EXHAUSTIVE_APPROACH = 0, TIMEOUT_METHOD = 1, DATA_COLLECTION_METHOD = EXHAUSTIVE_APPROACH;
 
 var app = express();
 
@@ -492,7 +494,135 @@ var help = function(bot, message, inChannel) {
 
 
 /************************************************************************************
-* The general Framework for Asking questions to the users
+* The Exhaustive Framework for Asking questions to the users
+**************************************************************************************/
+var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
+  CrowdConsensus.getResponses(cb_id, function(resp){
+
+    // reset the instance if previously stopped
+    if(ExhaustiveScheduler.getInstance() && ExhaustiveScheduler.getInstance().STOP_ASKING_QUESTION)
+    ExhaustiveScheduler.self = null;
+
+    ExhaustiveScheduler.create(resp);
+
+    // add members
+    for(var member in members) {
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  )
+      ExhaustiveScheduler.getInstance().activeUsers.push(members[member].id);
+    }
+
+    // set the total population count
+    ExhaustiveScheduler.getInstance().totalPopulation = ExhaustiveScheduler.getInstance().activeUsers.length;
+    ExhaustiveScheduler.getInstance().on('question_user_paired', function(pair, uid, index, ts){
+
+      bot.startPrivateConversation({user : uid}, function(err, convo){
+
+        if(err) {
+          console.log(err);
+          return;
+        }
+
+        convo.ask({
+          delete_original : true,
+          attachments:[
+            {
+              title: "Between the two objects *" + pair.object1 + "* and *" + pair.object2 + "*, which is better on criteria *" + pair.criterion+"*",
+              fallback : 'You have a new question',
+              callback_id: "" + ts +":"+ index,
+              attachment_type: 'default',
+              actions: [
+                {
+                  "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                  "text": ""+pair.object1 + " > " + pair.object2,
+                  "type": "button",
+                  "value": "gt"
+                },
+                {
+                  "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                  "text": ""+pair.object1 + " < " + pair.object2,
+                  "type": "button",
+                  "value": "lt"
+                },
+                {
+                  "name": ""+pair.object1 + "," + pair.object2+"," + pair.criterion,
+                  "text": "" + pair.object1 + " ~ " + pair.object2,
+                  "type": "button",
+                  "value": "~",
+                }
+              ]
+            }
+          ]
+        },[
+          {
+            pattern: "gt",
+            callback: function(reply, convo) {
+              var username = lookupUserNameFromId(reply.user);
+              console.log("The username is : " + reply.user + ", >");
+              //console.log("received response with timestamp : " + reply.callback_id);
+              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
+              if(pr) {
+                convo.say('You said  *' + pr.object1 + '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
+                saveInDB(cb_id, reply.user, reply.user, pr, '&gt;');
+              } else convo.say('Something went wrong darn');
+              convo.next();
+            }
+          },
+          {
+            pattern: "lt",
+            callback: function(reply, convo) {
+              var username = lookupUserNameFromId(reply.user);
+              console.log("The username is : " + reply.user + ", <");
+              //console.log("received response with timestamp : " + reply.callback_id);
+              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
+              if(pr) {
+                 convo.say('You said  *' + pr.object2 + '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
+                 saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
+              } else convo.say('Something went wrong darn');
+              convo.next();
+            }
+          },
+          {
+            pattern: "~",
+            callback: function(reply, convo) {
+              var username = lookupUserNameFromId(reply.user);
+              console.log("The username is : " + reply.user + ", ~");
+              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
+              if(pr) {
+                 convo.say('You said  *' + pr.object1 + '* is indifferent to *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
+                 saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
+              } else convo.say('Something went wrong darn');
+              convo.next();
+            }
+          },
+          {
+            default: true,
+            callback: function(reply, convo) {
+              console.log("received response with timestamp : " + reply.callback_id + " which couldnt be located");
+            }
+          }
+        ]);
+      });
+    });
+
+    ExhaustiveScheduler.getInstance().on('problem_finish', function(a) {
+      // Tell the user that the task is done
+      bot.api.im.open({user : a}, function(err4, res4) {
+        if(res4.channel.id)
+        bot.api.chat.postMessage({channel : res4.channel.id, text : "The task is finished. Thank you for your response"}, function(err3, res2) {
+          if(err3) console.log(""+err3);
+        });
+      });
+    });
+
+    // start asking users
+    if(ExhaustiveScheduler.getInstance().activeUsers.length > 0) ExhaustiveScheduler.getInstance().scheduleQues();
+    else console.log("The population is zero. Something wrong. Hmmm");
+  });
+};
+
+
+/************************************************************************************
+* The general timeout Framework for Asking questions to the users
 **************************************************************************************/
 var quesAskFramework = function(bot, message, cb_id, members, channelId) {
 
@@ -733,6 +863,9 @@ controller.on('slash_command',function(bot,message) {
 
                 // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
                 if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
+                  if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH)
+                  exhaustiveAskFramework(bot, message, cb_id, detailUsersInfoList, message.channel);
+                  else if (DATA_COLLECTION_METHOD == TIMEOUT_METHOD)
                   quesAskFramework(bot, message, cb_id, detailUsersInfoList, message.channel);
                 } else {
                   console.log("Most probably the QuesScheduler instance is not null");
@@ -895,6 +1028,9 @@ controller.hears(["ask (.*)"],["direct_message", "direct_mention","mention","amb
         }
 
         if(!err) {
+          if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH)
+          exhaustiveAskFramework(bot, message, cb_id, res.members, message.channel);
+          else if (DATA_COLLECTION_METHOD == TIMEOUT_METHOD)
           quesAskFramework(bot, message, cb_id, res.members, message.channel);
         }
       });
