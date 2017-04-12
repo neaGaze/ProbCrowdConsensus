@@ -115,7 +115,7 @@ ExhaustiveScheduler.prototype.scheduleQues = function(cb_id){
   /********************************************************************************************
   * Asks the next question in the List to that user
   ********************************************************************************************/
-  ExhaustiveScheduler.prototype.nextQues = function(user, index) {
+  ExhaustiveScheduler.prototype.nextQues = function(user, index, callback) {
     var currAnsweredQues = self.userToQuesPairing[user][index];
     self.userToQuesPairing[user].splice(index, 1);
 
@@ -130,7 +130,8 @@ ExhaustiveScheduler.prototype.scheduleQues = function(cb_id){
         console.log("the randomly chosen question is out of array bounds");
       }
     }
-    return currAnsweredQues;
+    //return currAnsweredQues;
+    callback(currAnsweredQues, (self.questionList.length - self.userToQuesPairing[user].length));
   }
 
   module.exports = ExhaustiveScheduler;

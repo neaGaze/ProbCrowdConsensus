@@ -559,11 +559,12 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
               var username = lookupUserNameFromId(reply.user);
               console.log("The username is : " + reply.user + ", >");
               //console.log("received response with timestamp : " + reply.callback_id);
-              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
-              if(pr) {
-                convo.say('You said  *' + pr.object1 + '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
-                saveInDB(cb_id, reply.user, reply.user, pr, '&gt;');
-              } else convo.say('It looks like you already answered that one');
+              ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10), function(pr, askedCount) {
+                if(pr) {
+                  convo.say('#' + askedCount + ' You said  *' + pr.object1 + '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
+                  saveInDB(cb_id, reply.user, reply.user, pr, '&gt;');
+                } else convo.say('It looks like you already answered that one');
+              });
               convo.next();
             }
           },
@@ -573,11 +574,12 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
               var username = lookupUserNameFromId(reply.user);
               console.log("The username is : " + reply.user + ", <");
               //console.log("received response with timestamp : " + reply.callback_id);
-              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
-              if(pr) {
-                convo.say('You said  *' + pr.object2 + '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
-                saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
-              } else convo.say('It looks like you already answered that one');
+              ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10), function(pr, askedCount) {
+                if(pr) {
+                  convo.say('#' + askedCount + ' You said  *' + pr.object2 + '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
+                  saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
+                } else convo.say('It looks like you already answered that one');
+              });
               convo.next();
             }
           },
@@ -586,11 +588,12 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
             callback: function(reply, convo) {
               var username = lookupUserNameFromId(reply.user);
               console.log("The username is : " + reply.user + ", ~");
-              var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
-              if(pr) {
-                convo.say('You said  *' + pr.object1 + '* is indifferent to *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
-                saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
-              } else convo.say('It looks like you already answered that one');
+              ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10), function(pr, askedCount) {
+                if(pr) {
+                  convo.say('#' + askedCount + ' You said  *' + pr.object1 + '* is indifferent to *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
+                  saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
+                } else convo.say('It looks like you already answered that one');
+              });
               convo.next();
             }
           },
