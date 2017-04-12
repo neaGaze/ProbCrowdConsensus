@@ -4,6 +4,7 @@ math = require('mathjs'),
 fs = require('fs'),
 uuid = require('uuid/v1'),
 Combination = require("../algo/Combination.js"),
+CrowdReply = require("../db/CrowdReply.js"),
 EventEmitter = require('events').EventEmitter;
 
 var self;
@@ -62,7 +63,7 @@ function shuffle(array) {
 /********************************************************************************************
 * Assign users with questions
 ********************************************************************************************/
-ExhaustiveScheduler.prototype.scheduleQues = function(){
+ExhaustiveScheduler.prototype.scheduleQues = function(cb_id){
 
   var combn = new Combination(self.param.objects, self.param.criteria);
   self.questionList = combn.getCombination();
@@ -72,44 +73,67 @@ ExhaustiveScheduler.prototype.scheduleQues = function(){
 
   for(var u = 0; u < self.activeUsers.length; u++) {
     self.userToQuesPairing[self.activeUsers[u]] = [];
-    for(var q = 0; q < self.questionList.length; q++) {
-      // TODO check in the CrowdReply module and push only if that user hasn't responded on those questions
-      self.userToQuesPairing[self.activeUsers[u]].push(self.questionList[q]);
+
+    // Receive replies from crowd which were saved in db and don't ask those again
+    CrowdReply.getRepliesFromUser(cb_id, self.param.objects, self.param.criteria, self.activeUsers[u], function(replies, uid){
+
+      for(var q = 0; q < self.questionList.length; q++) {
+        self.userToQuesPairing[uid].push(self.questionList[q]);
+      }
+
+      for(var i = 0; i < replies.length; i++) {
+        var reply = replies[i];
+
+        // remove the replies if found in the database
+        for(var j = 0; j < self.userToQuesPairing[uid].length; j++) {
+          if(self.userToQuesPairing[uid][j].object1 == reply.object1 && self.userToQuesPairing[uid][j].object2 == reply.object2 &&
+            self.userToQuesPairing[uid][j].criterion == reply.criterion) {
+              self.userToQuesPairing[uid].splice(j, 1);
+              break;
+            }
+          }
+        }
+
+        if(replies.length > 0) console.log("Pruned questions for " + uid+" : \n" + self.userToQuesPairing[uid].length+", q : " + q);
+
+        // emit if reached the last question
+        //if(q == self.questionList.length) {
+
+        var randIndex = Math.floor(Math.random() * self.userToQuesPairing[uid].length);
+        if(self.userToQuesPairing[uid].length > 0 && randIndex < self.userToQuesPairing[uid].length) {
+          console.log("randIndex updated : " + randIndex);
+          self.emit('question_user_paired', self.userToQuesPairing[uid][randIndex], uid, randIndex, uuid());
+        } else {
+          console.log("the randomly chosen question is out of array bounds");
+        }
+      });
     }
-    var randIndex = Math.floor(Math.random() * self.questionList.length);
-    if(randIndex < self.questionList.length) {
-      self.emit('question_user_paired', self.userToQuesPairing[self.activeUsers[u]][randIndex], self.activeUsers[u], randIndex, uuid());
+
+    console.log("\n********************************************");
+  };
+
+  /********************************************************************************************
+  * Asks the next question in the List to that user
+  ********************************************************************************************/
+  ExhaustiveScheduler.prototype.nextQues = function(user, index) {
+    var currAnsweredQues = self.userToQuesPairing[user][index];
+    self.userToQuesPairing[user].splice(index, 1);
+
+    // when there is no more questions left for that user
+    if(self.userToQuesPairing[user].length == 0) {
+      self.emit('problem_finish', user);
     } else {
-      console.log("the randomly chosen question is out of array bounds");
+      var randIndex = Math.floor(Math.random() * self.userToQuesPairing[user].length);
+      if(randIndex < self.userToQuesPairing[user].length) {
+        self.emit('question_user_paired', self.userToQuesPairing[user][randIndex], user, randIndex);
+      } else {
+        console.log("the randomly chosen question is out of array bounds");
+      }
     }
+    return currAnsweredQues;
   }
 
-  console.log("\n********************************************");
-};
-
-/********************************************************************************************
-* Asks the next question in the List to that user
-********************************************************************************************/
-ExhaustiveScheduler.prototype.nextQues = function(user, index) {
-  var currAnsweredQues = self.userToQuesPairing[user][index];
-  self.userToQuesPairing[user].splice(index, 1);
-
-  // when there is no more questions left for that user
-  if(self.userToQuesPairing[user].length == 0) {
-    self.emit('problem_finish', user);
-  }
-  else {
-  var randIndex = Math.floor(Math.random() * self.userToQuesPairing[user].length);
-  if(randIndex < self.userToQuesPairing[user].length) {
-    self.emit('question_user_paired', self.userToQuesPairing[user][randIndex], user, randIndex);
-  } else {
-    console.log("the randomly chosen question is out of array bounds");
-  }
-}
-  return currAnsweredQues;
-}
-
-module.exports = ExhaustiveScheduler;
-module.exports.create = create;
-module.exports.destroy = destroy;
-module.exports.getInstance = getInstance;
+  module.exports = ExhaustiveScheduler;
+  module.exports.create = create;
+  module.exports.destroy = destroy;
+  module.exports.getInstance = getInstance;

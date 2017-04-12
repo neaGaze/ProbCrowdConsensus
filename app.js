@@ -526,7 +526,7 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
           delete_original : true,
           attachments:[
             {
-              title: "Between the two objects *" + pair.object1 + "* and *" + pair.object2 + "*, which is better on criteria *" + pair.criterion+"*",
+              title: "In comparing the 2 programming languages : *" + pair.object1 + "* and *" + pair.object2 + "*, which one do you think is better in terms of  *" + pair.criterion+"*",
               fallback : 'You have a new question',
               callback_id: "" + ts +":"+ index,
               attachment_type: 'default',
@@ -563,7 +563,7 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
               if(pr) {
                 convo.say('You said  *' + pr.object1 + '* is better than *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
                 saveInDB(cb_id, reply.user, reply.user, pr, '&gt;');
-              } else convo.say('Something went wrong darn');
+              } else convo.say('It looks like you already answered that one');
               convo.next();
             }
           },
@@ -575,9 +575,9 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
               //console.log("received response with timestamp : " + reply.callback_id);
               var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
               if(pr) {
-                 convo.say('You said  *' + pr.object2 + '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
-                 saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
-              } else convo.say('Something went wrong darn');
+                convo.say('You said  *' + pr.object2 + '* is better than *' + pr.object1 + '* on criteria *' + pr.criterion+'*');
+                saveInDB(cb_id, reply.user, reply.user, pr, '&lt;');
+              } else convo.say('It looks like you already answered that one');
               convo.next();
             }
           },
@@ -588,9 +588,9 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
               console.log("The username is : " + reply.user + ", ~");
               var pr = ExhaustiveScheduler.getInstance().nextQues(reply.user, parseInt(reply.callback_id.split(":")[1], 10));
               if(pr) {
-                 convo.say('You said  *' + pr.object1 + '* is indifferent to *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
-                 saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
-              } else convo.say('Something went wrong darn');
+                convo.say('You said  *' + pr.object1 + '* is indifferent to *' + pr.object2 + '* on criteria *' + pr.criterion+'*');
+                saveInDB(cb_id, reply.user, reply.user, pr, '&#126;');
+              } else convo.say('It looks like you already answered that one');
               convo.next();
             }
           },
@@ -615,7 +615,7 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
     });
 
     // start asking users
-    if(ExhaustiveScheduler.getInstance().activeUsers.length > 0) ExhaustiveScheduler.getInstance().scheduleQues();
+    if(ExhaustiveScheduler.getInstance().activeUsers.length > 0) ExhaustiveScheduler.getInstance().scheduleQues(cb_id);
     else console.log("The population is zero. Something wrong. Hmmm");
   });
 };
@@ -862,10 +862,10 @@ controller.on('slash_command',function(bot,message) {
                 console.log("detailUsersInfo -> " + detailUsersInfo.name + " and count: " + i)
 
                 // don't ask if previously already asked or the bot details couldb't be found and ask only at the last iterat of this loop
-                if(!QuesScheduler.getInstance() && detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
-                  if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH)
+                if(detailUsersInfo && detailUsersInfoList.length == usersInChannel.length) {
+                  if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH && !ExhaustiveScheduler.getInstance())
                   exhaustiveAskFramework(bot, message, cb_id, detailUsersInfoList, message.channel);
-                  else if (DATA_COLLECTION_METHOD == TIMEOUT_METHOD)
+                  else if (DATA_COLLECTION_METHOD == TIMEOUT_METHOD && !QuesScheduler.getInstance())
                   quesAskFramework(bot, message, cb_id, detailUsersInfoList, message.channel);
                 } else {
                   console.log("Most probably the QuesScheduler instance is not null");
@@ -940,10 +940,14 @@ controller.on('slash_command',function(bot,message) {
       bot.replyPrivate(message, '<@' + message.user + '>' + " You need to pass the id of the problem. Type '/helpme' if you need help");
     } else if(parseInt(message.text)){
       var num = parseInt(message.text);
+      var instance;
 
-      if(QuesScheduler.getInstance()) {
+      if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH) instance = ExhaustiveScheduler.getInstance();
+      else if(DATA_COLLECTION_METHOD == TIMEOUT_METHOD) instance = QuesScheduler.getInstance();
 
-        QuesScheduler.getInstance().STOP_ASKING_QUESTION = true,
+      if(instance) {
+
+        instance.STOP_ASKING_QUESTION = true,
         isFirstReply = true;
 
         CrowdConsensus.findId(num, isFirstReply, function(cb_id){
@@ -956,10 +960,14 @@ controller.on('slash_command',function(bot,message) {
                 if(err) console.error(err);
                 else console.log("Deleted all associated the replies");
 
-                setTimeout(function(){QuesScheduler.destroy()}, (QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND + 2000));
-                console.log("secs -> "+(QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2);
+                if(DATA_COLLECTION_METHOD == TIMEOUT_METHOD)
+                setTimeout(function(){QuesScheduler.destroy()}, (instance.TIMEOUT_FOR_USER_TO_RESPOND + 2000));
+                else if(DATA_COLLECTION_METHOD == EXHAUSTIVE_APPROACH)
+                ExhaustiveScheduler.destroy();
+
+                console.log("secs -> "+(instance.TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2);
                 bot.replyPrivate(message, 'OK all process will be stopped. Please wait for ' +
-                ((QuesScheduler.getInstance().TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2) + " secs before asking any questions again");
+                ((instance.TIMEOUT_FOR_USER_TO_RESPOND / 1000) + 2) + " secs before asking any questions again");
               });
             }
           });
@@ -1088,7 +1096,23 @@ controller.hears(["Delete (.*)"],["direct_message","direct_mention","mention","a
 }
 });
 */
-bot.api.chat.postMessage({channel : message.channel, text : "Yo doug! Waasup?"+message.channel});
+// bot.api.chat.postMessage({channel : message.channel, text : "Yo doug! Waasup?"+message.channel});
+});
+
+controller.hears(["Status"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  bot.startPrivateConversation({user : message.user} ,function(err,dm) {
+    if(ExhaustiveScheduler.getInstance())
+    dm.say('The task is running');
+    else dm.say('No tasks running');
+  })
+});
+
+controller.hears(["killall"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  bot.startPrivateConversation({user : message.user} ,function(err,dm) {
+    ExhaustiveScheduler.destroy();
+    QuesScheduler.destroy();
+    dm.say('All tasks killed');
+  })
 });
 
 controller.hears(["run (.*)"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
