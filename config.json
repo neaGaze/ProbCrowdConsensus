@@ -6,6 +6,6 @@
   "CONFIDENCE_INTERVAL" : 0.8,
   "MARGIN_OF_ERROR" : 0.3,
   "TIMEOUT_INTERVAL" : 30000,
-  "DEST_IP_ADDR" : "http://192.168.0.11:3000",
+  "DEST_IP_ADDR" : "https://testapp.localtunnel.me",
   "HOST_IP_ADDR" : "https://salty-reaches-13802.herokuapp.com"
 }

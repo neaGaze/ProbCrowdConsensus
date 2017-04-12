@@ -526,7 +526,7 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
           delete_original : true,
           attachments:[
             {
-              title: "In comparing the 2 programming languages : *" + pair.object1 + "* and *" + pair.object2 + "*, which one do you think is better in terms of  *" + pair.criterion+"*",
+              title: "In comparing these 2 : *" + pair.object1 + "* and *" + pair.object2 + "*, which one do you think is better in terms of  *" + pair.criterion+"*",
               fallback : 'You have a new question',
               callback_id: "" + ts +":"+ index,
               attachment_type: 'default',
