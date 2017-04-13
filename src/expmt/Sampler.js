@@ -40,13 +40,15 @@ function generateSampleSize(totalPopulation) {
   marginOfError = nconf.get("MARGIN_OF_ERROR");
   // assuming p = 1/3 or conservative guess
   var normalizedConfidenceLevel = math.round(((1 - confidenceInterval) / 2) * 1000) / 1000;
-  console.log("popn: " + totalPopulation);
+  console.log("Total Population: " + totalPopulation);
   var m = math.square(ttable[totalPopulation+""][normalizedConfidenceLevel+""] / marginOfError) * 0.222;
   var sample = (totalPopulation * m) / (totalPopulation - 1 + m);
   if(sample)
   sample = math.ceil(sample);
   else sample = nconf.get('NUMBER_OF_USERS_TO_ASK');
-  console.log("sample size: " + sample);
+  console.log("Minimal Sample Size: " + sample+"\n");
+  console.log("Confidence Level: "+confidenceInterval);
+  console.log("Threshold for Margin of Error: " + marginOfError);
   return sample;
 }
 
@@ -85,9 +87,9 @@ function findConfidenceInterval(n, p_gt, p_lt, p_indiff){
 }
 
 function Sampler(){
-  var parent_cb_id = "58a621fbb55671064acee0f1";   // We use the same cb_id to sample its subset problems
-  var sampObjSize = 4;  // minimum objects = 2
-  var sampCritSize = 2;  // minimum criteria = 1
+  var parent_cb_id = "58ed20c122e5a90520c3a1f7";   // We use the same cb_id to sample its subset problems
+  var sampObjSize = 5;  // minimum objects = 2
+  var sampCritSize = 1;  // minimum criteria = 1
   var THRESHOLD = nconf.get("THRESHOLD_FOR_CI"); // threshold margin for selecting our desired confidence interval
 
   CrowdConsensus.getResponses(parent_cb_id, function(resp){
@@ -102,7 +104,7 @@ function Sampler(){
 
     // also save it
     var wstrm1 = fs.createWriteStream(__dirname + "/input/ip.json");
-    wstrm1.write(JSON.stringify(resp));
+    wstrm1.write(JSON.stringify({"responses" : [], "objects" : objects, "criteria" : criteria}));
     wstrm1.end();
 
     // get the corresponding Crowd replies
@@ -120,10 +122,10 @@ function Sampler(){
       for(var q = 0; q < questionList.length; q++) {
         questionList[q].candidates = [];
         questionList[q].sampleSize = minimalSampleSize;
-        console.log("\n-------- "+questionList[q].object1 + "(" + questionList[q].criterion+")" + questionList[q].object2+" ----------");
+  //      console.log("\n-------- "+questionList[q].object1 + "(" + questionList[q].criterion+")" + questionList[q].object2+" ----------");
         var toSpliceList = [];
         for(var a = 0; a < replies.length; a++) {
-          console.log(""+replies[a].object1 + "(" + replies[a].criterion+") " + replies[a].object2);
+  //        console.log(""+replies[a].object1 + "(" + replies[a].criterion+") " + replies[a].object2);
           if((questionList[q].object1 == replies[a].object1 &&
             questionList[q].object2 == replies[a].object2 &&
             questionList[q].criterion == replies[a].criterion) ||
@@ -147,6 +149,7 @@ function Sampler(){
           // aggregate the response into a probabilistic values and also find the confidence intervals
           for(var q = 0; q < questionList.length; q++) {
             console.log("\n********** "+questionList[q].object1+" ("+questionList[q].criterion+") "+questionList[q].object2+" *******\n");
+            console.log("sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold");
             // repeat until the confidence intervals for all 3 outcomes {>,~,<} are less than THRESHOLD value
             while(questionList[q].sampleSize <= popnSize) {
 
@@ -167,7 +170,6 @@ function Sampler(){
 
               // find the confidence interval for all 3 outputs
               var ciList = findConfidenceInterval(questionList[q].sampleSize, questionList[q].gt, questionList[q].lt, questionList[q].indiff)
-
               var ranges = [];
               for(var ri = 0; ri < ciList.length; ri++) {
                 // we adjust the values within [0,1]
@@ -187,7 +189,8 @@ function Sampler(){
                 //console.log("["+ciList[ri][0] + ", " + ciList[ri][1]+"]");
               }
 
-              console.log(questionList[q].sampleSize + " : " + ranges[0].toFixed(2) + ", " + ranges[1].toFixed(2) + ", " + ranges[2].toFixed(2) + " | " + THRESHOLD);
+              console.log(questionList[q].sampleSize + "            :     (" + ranges[0].toFixed(2) + "       " + ranges[1].toFixed(2) + "      " + ranges[2].toFixed(2) + ")   " +
+              ((ranges[0] < THRESHOLD && ranges[1] < THRESHOLD && ranges[2] < THRESHOLD) ? "<" : ">") + "   " + THRESHOLD);
               if(ranges[0] < THRESHOLD && ranges[1] < THRESHOLD && ranges[2] < THRESHOLD) break;
               questionList[q].sampleSize++;
             }

@@ -1,10 +1,11 @@
 {
   "CROWD_CONSENSUS_MONGO_URL" : "mongodb://neaGaze:neaGaze@ds153729.mlab.com:53729/crowdconsensus2",
   "THRESHOLD" : 2,
-  "THRESHOLD_FOR_CI" : 0.3,
+  "THRESHOLD_FOR_CI" : 0.5,
   "NUMBER_OF_USERS_TO_ASK" : 20,
-  "CONFIDENCE_INTERVAL" : 0.8,
-  "MARGIN_OF_ERROR" : 0.3,
+  "CONFIDENCE_INTERVAL" : 0.95,
+  "PRUNING_THRESHOLD" : 0.05,
+  "MARGIN_OF_ERROR" : 0.5,
   "TIMEOUT_INTERVAL" : 30000,
   "DEST_IP_ADDR" : "https://testapp.localtunnel.me",
   "HOST_IP_ADDR" : "https://salty-reaches-13802.herokuapp.com"

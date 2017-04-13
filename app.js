@@ -507,8 +507,7 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
 
     // add members
     for(var member in members) {
-      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  //)
-          && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/))
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted)
       ExhaustiveScheduler.getInstance().activeUsers.push(members[member].id);
     }
 
