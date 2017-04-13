@@ -2,7 +2,7 @@
   "CROWD_CONSENSUS_MONGO_URL" : "mongodb://neaGaze:neaGaze@ds153729.mlab.com:53729/crowdconsensus2",
   "THRESHOLD" : 2,
   "THRESHOLD_FOR_CI" : 0.3,
-  "NUMBER_OF_USERS_TO_ASK" : 2,
+  "NUMBER_OF_USERS_TO_ASK" : 20,
   "CONFIDENCE_INTERVAL" : 0.8,
   "MARGIN_OF_ERROR" : 0.3,
   "TIMEOUT_INTERVAL" : 30000,

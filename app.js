@@ -507,7 +507,8 @@ var exhaustiveAskFramework = function(bot, message, cb_id, members, channelId) {
 
     // add members
     for(var member in members) {
-      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  )
+      if(!members[member].is_bot && members[member].id !== 'USLACKBOT' && !members[member].deleted  //)
+          && (members[member].id == "U28260VFX" /*|| members[member].id == "U281R5JFJ"*/))
       ExhaustiveScheduler.getInstance().activeUsers.push(members[member].id);
     }
 
@@ -1115,6 +1116,26 @@ controller.hears(["killall"],["direct_message","direct_mention","mention","ambie
     ExhaustiveScheduler.destroy();
     QuesScheduler.destroy();
     dm.say('All tasks killed');
+  })
+});
+
+
+controller.hears(["randomize"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  bot.startPrivateConversation({user : message.user} ,function(err,dm) {
+  /*  var fromIDIR = fs.readFileSync("idir.json");
+    var jsonFileFromIDIR = JSON.parse(fromIDIR);
+    var anonymous = fs.readFileSync("1.json");
+    var jsonFileFromIDIR = JSON.parse(fromIDIR);
+    var newjsonFile = {};
+    for(var each in jsonFileFromIDIR) {
+      if(jsonFileFromIDIR.member_id == "U4YFXQJVA"){}
+    }
+  */
+
+  CCReply.remove({"member_id" : {'$ne' : "U2825511V"}}, function(err){
+
+  });
+    dm.say('Random data created');
   })
 });
 
