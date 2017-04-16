@@ -1,0 +1,804 @@
+--------- Ranks of objects based on Probabilistic distribution ----------
+Objects:
+R
+Scala
+Javascript
+C
+Python
+
+Criteria:
+Easiness in learning
+------------------------------------
+Total number of Possible World = 59049
+Total Population: 15
+Minimal Sample Size: 4
+Pruning Threshold : 0.05
+Confidence Level: 0.95
+Threshold for Margin of Error: 0.5
+
+********** R (Easiness in learning) Scala *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (0.80       0.80      0.80)   >   0.5
+7            :     (0.87       0.69      0.69)   >   0.5
+8            :     (0.77       0.60      0.77)   >   0.5
+9            :     (0.75       0.54      0.69)   >   0.5
+10            :     (0.69       0.48      0.69)   >   0.5
+11            :     (0.64       0.44      0.66)   >   0.5
+12            :     (0.62       0.40      0.62)   >   0.5
+13            :     (0.60       0.37      0.58)   >   0.5
+14            :     (0.57       0.34      0.55)   >   0.5
+15            :     (0.55       0.32      0.54)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.19, 0.74]        false
+~        [0.00, 0.32]        false
+<        [0.13, 0.67]        false
+-------------------------------------
+
+********** R (Easiness in learning) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** R (Easiness in learning) C *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (1.00       0.80      0.54)   >   0.5
+7            :     (0.87       0.69      0.46)   >   0.5
+8            :     (0.77       0.60      0.39)   >   0.5
+9            :     (0.69       0.54      0.35)   >   0.5
+10            :     (0.62       0.48      0.31)   >   0.5
+11            :     (0.57       0.44      0.28)   >   0.5
+12            :     (0.52       0.40      0.26)   >   0.5
+13            :     (0.48       0.37      0.24)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.18 and lowerLimit <= 0)?
+>        [0.52, 1.00]        false
+~        [0.00, 0.37]        false
+<        [0.00, 0.24]        false
+-------------------------------------
+
+********** R (Easiness in learning) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.85      0.85)   >   0.5
+5            :     (0.96       0.66      0.66)   >   0.5
+6            :     (0.80       0.54      0.54)   >   0.5
+7            :     (0.87       0.69      0.46)   >   0.5
+8            :     (0.77       0.60      0.39)   >   0.5
+9            :     (0.69       0.54      0.35)   >   0.5
+10            :     (0.62       0.48      0.31)   >   0.5
+11            :     (0.57       0.44      0.28)   >   0.5
+12            :     (0.52       0.40      0.26)   >   0.5
+13            :     (0.48       0.37      0.24)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.18 and lowerLimit <= 0)?
+>        [0.52, 1.00]        false
+~        [0.00, 0.37]        false
+<        [0.00, 0.24]        false
+-------------------------------------
+
+********** Scala (Easiness in learning) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Scala (Easiness in learning) C *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Scala (Easiness in learning) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Javascript (Easiness in learning) C *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Javascript (Easiness in learning) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.85      0.85)   >   0.5
+5            :     (0.96       0.66      0.66)   >   0.5
+6            :     (0.80       0.54      0.54)   >   0.5
+7            :     (0.69       0.46      0.46)   >   0.5
+8            :     (0.60       0.39      0.39)   >   0.5
+9            :     (0.54       0.35      0.35)   >   0.5
+10            :     (0.48       0.31      0.31)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.20 and lowerLimit <= 0)?
+>        [0.52, 1.00]        false
+~        [0.00, 0.31]        false
+<        [0.00, 0.31]        false
+-------------------------------------
+
+********** C (Easiness in learning) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.00, 0.46]        false
+~        [0.54, 1.00]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+Calculated Zero worlds : 58887
+zero prob question: 11
+ranks:
+  'undefined': '0.1325', 'R': '0.6205', 'Scala': '0.5333', 'Javascript': '0', 'C': '0', 'Python': '0'
+
+---------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
+
+--------- Ranks of objects based on Probabilistic distribution ----------
+Objects:
+R
+Scala
+Java
+C++
+Python
+
+Criteria:
+Speed of Processing
+------------------------------------
+Total number of Possible World = 59049
+Total Population: 15
+Minimal Sample Size: 4
+Pruning Threshold : 0.05
+Confidence Level: 0.95
+Threshold for Margin of Error: 0.5
+
+********** R (Speed of Processing) Scala *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.07      1.00)   >   0.5
+5            :     (0.96       0.06      0.96)   >   0.5
+6            :     (0.80       0.54      1.00)   >   0.5
+7            :     (0.69       0.69      0.87)   >   0.5
+8            :     (0.60       0.60      0.82)   >   0.5
+9            :     (0.54       0.54      0.75)   >   0.5
+10            :     (0.48       0.48      0.69)   >   0.5
+11            :     (0.57       0.44      0.66)   >   0.5
+12            :     (0.52       0.52      0.63)   >   0.5
+13            :     (0.55       0.48      0.60)   >   0.5
+14            :     (0.55       0.45      0.57)   >   0.5
+15            :     (0.52       0.42      0.55)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.07, 0.59]        false
+~        [0.00, 0.42]        false
+<        [0.19, 0.74]        false
+-------------------------------------
+
+********** R (Speed of Processing) Java *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       1.00      0.85)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (0.80       1.00      0.54)   >   0.5
+7            :     (0.69       0.87      0.46)   >   0.5
+8            :     (0.60       0.82      0.60)   >   0.5
+9            :     (0.54       0.75      0.54)   >   0.5
+10            :     (0.48       0.69      0.48)   >   0.5
+11            :     (0.57       0.66      0.44)   >   0.5
+12            :     (0.52       0.62      0.40)   >   0.5
+13            :     (0.48       0.58      0.37)   >   0.5
+14            :     (0.45       0.55      0.34)   >   0.5
+15            :     (0.42       0.54      0.42)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.00, 0.42]        false
+~        [0.33, 0.87]        false
+<        [0.00, 0.42]        false
+-------------------------------------
+
+********** R (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.54, 1.00]        false
+~        [0.00, 0.46]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** R (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.54, 1.00]        false
+~        [0.00, 0.46]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** Scala (Speed of Processing) Java *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.07      1.00)   >   0.5
+5            :     (0.96       0.06      0.96)   >   0.5
+6            :     (0.80       0.54      1.00)   >   0.5
+7            :     (0.69       0.69      0.87)   >   0.5
+8            :     (0.77       0.60      0.77)   >   0.5
+9            :     (0.69       0.69      0.69)   >   0.5
+10            :     (0.62       0.69      0.62)   >   0.5
+11            :     (0.57       0.66      0.57)   >   0.5
+12            :     (0.59       0.62      0.52)   >   0.5
+13            :     (0.58       0.58      0.48)   >   0.5
+14            :     (0.55       0.55      0.52)   >   0.5
+15            :     (0.52       0.52      0.52)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.07, 0.59]        false
+~        [0.07, 0.59]        false
+<        [0.07, 0.59]        false
+-------------------------------------
+
+********** Scala (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Scala (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (1.00       0.80      0.54)   >   0.5
+7            :     (0.87       0.69      0.46)   >   0.5
+8            :     (0.77       0.60      0.39)   >   0.5
+9            :     (0.69       0.54      0.35)   >   0.5
+10            :     (0.69       0.62      0.31)   >   0.5
+11            :     (0.64       0.57      0.28)   >   0.5
+12            :     (0.59       0.52      0.26)   >   0.5
+13            :     (0.55       0.48      0.24)   >   0.5
+14            :     (0.52       0.45      0.22)   >   0.5
+15            :     (0.49       0.42      0.20)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.49, 0.98]        false
+~        [0.00, 0.42]        false
+<        [0.00, 0.20]        false
+-------------------------------------
+
+********** Java (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Java (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.00, 0.46]        false
+~        [0.54, 1.00]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** C++ (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+Calculated Zero worlds : 58401
+zero prob question : 9
+ranks:
+  'undefined': '0.4825', 'R': '0.2351', 'Scala': '0.3556', 'Java': '0', 'C++': '0', 'Python': '0'
+
+
+---------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
+
+--------- Ranks of objects based on Probabilistic distribution ----------
+Objects:
+Java
+Scala
+Javascript
+C++
+Python
+
+Criteria:
+Speed of Processing
+------------------------------------
+Total number of Possible World = 59049
+Total Population: 15
+Minimal Sample Size: 4
+Pruning Threshold : 0.05
+Confidence Level: 0.95
+Threshold for Margin of Error: 0.5
+
+********** Java (Speed of Processing) Scala *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.07      1.00)   >   0.5
+5            :     (0.96       0.06      0.96)   >   0.5
+6            :     (0.80       0.54      1.00)   >   0.5
+7            :     (0.69       0.69      0.87)   >   0.5
+8            :     (0.77       0.60      0.77)   >   0.5
+9            :     (0.69       0.69      0.69)   >   0.5
+10            :     (0.62       0.69      0.62)   >   0.5
+11            :     (0.57       0.66      0.57)   >   0.5
+12            :     (0.59       0.62      0.52)   >   0.5
+13            :     (0.58       0.58      0.48)   >   0.5
+14            :     (0.55       0.55      0.52)   >   0.5
+15            :     (0.52       0.52      0.52)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.07, 0.59]        false
+~        [0.07, 0.59]        false
+<        [0.07, 0.59]        false
+-------------------------------------
+
+********** Java (Speed of Processing) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Java (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Java (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.00, 0.46]        false
+~        [0.54, 1.00]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** Scala (Speed of Processing) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.06)   >   0.5
+6            :     (0.80       0.80      0.05)   >   0.5
+7            :     (0.87       0.87      0.04)   >   0.5
+8            :     (0.82       0.82      0.04)   >   0.5
+9            :     (0.75       0.75      0.03)   >   0.5
+10            :     (0.69       0.70      0.31)   >   0.5
+11            :     (0.64       0.66      0.28)   >   0.5
+12            :     (0.62       0.63      0.26)   >   0.5
+13            :     (0.60       0.60      0.24)   >   0.5
+14            :     (0.57       0.57      0.22)   >   0.5
+15            :     (0.55       0.54      0.20)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.26, 0.81]        false
+~        [0.13, 0.67]        false
+<        [0.00, 0.20]        false
+-------------------------------------
+
+********** Scala (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Scala (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (1.00       0.80      0.54)   >   0.5
+7            :     (0.87       0.69      0.46)   >   0.5
+8            :     (0.77       0.60      0.39)   >   0.5
+9            :     (0.69       0.54      0.35)   >   0.5
+10            :     (0.69       0.62      0.31)   >   0.5
+11            :     (0.64       0.57      0.28)   >   0.5
+12            :     (0.59       0.52      0.26)   >   0.5
+13            :     (0.55       0.48      0.24)   >   0.5
+14            :     (0.52       0.45      0.22)   >   0.5
+15            :     (0.49       0.42      0.20)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.49, 0.98]        false
+~        [0.00, 0.42]        false
+<        [0.00, 0.20]        false
+-------------------------------------
+
+********** Javascript (Speed of Processing) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.54, 1.00]        false
+~        [0.00, 0.46]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** Javascript (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** C++ (Speed of Processing) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.00       0.07      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [1.00, 1.00]        false
+~        [0.00, 0.07]        true
+<        [0.00, 0.07]        true
+-------------------------------------
+Calculated Zero worlds : 58941
+zero prob question : 12
+ranks:
+  'undefined': '0.3105', 'Java': '0', 'Scala': '0.32', 'Javascript': '0.4', 'C++': '0', 'Python': '0',
+
+
+---------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
+
+--------- Ranks of objects based on Probabilistic distribution ----------
+Objects:
+C#
+C
+Javascript
+C++
+Python
+
+Criteria:
+Processing Large Data
+------------------------------------
+Total number of Possible World = 59049
+Total Population: 15
+Minimal Sample Size: 4
+Pruning Threshold : 0.05
+Confidence Level: 0.95
+Threshold for Margin of Error: 0.5
+
+********** C# (Processing Large Data) C *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.80       0.54      0.54)   >   0.5
+7            :     (0.69       0.46      0.46)   >   0.5
+8            :     (0.60       0.39      0.39)   >   0.5
+9            :     (0.69       0.54      0.35)   >   0.5
+10            :     (0.62       0.48      0.31)   >   0.5
+11            :     (0.57       0.44      0.28)   >   0.5
+12            :     (0.52       0.40      0.26)   >   0.5
+13            :     (0.48       0.37      0.24)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.18 and lowerLimit <= 0)?
+>        [0.52, 1.00]        false
+~        [0.00, 0.37]        false
+<        [0.00, 0.24]        false
+-------------------------------------
+
+********** C# (Processing Large Data) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       1.00      0.07)   >   0.5
+5            :     (0.96       0.96      0.66)   >   0.5
+6            :     (0.80       1.00      0.54)   >   0.5
+7            :     (0.87       0.87      0.46)   >   0.5
+8            :     (0.77       0.82      0.39)   >   0.5
+9            :     (0.75       0.75      0.35)   >   0.5
+10            :     (0.69       0.70      0.31)   >   0.5
+11            :     (0.66       0.66      0.28)   >   0.5
+12            :     (0.62       0.63      0.26)   >   0.5
+13            :     (0.58       0.60      0.37)   >   0.5
+14            :     (0.55       0.57      0.34)   >   0.5
+15            :     (0.52       0.55      0.32)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.07, 0.59]        false
+~        [0.26, 0.81]        false
+<        [0.00, 0.32]        false
+-------------------------------------
+
+********** C# (Processing Large Data) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.96       0.66      0.66)   >   0.5
+6            :     (1.00       0.54      0.80)   >   0.5
+7            :     (0.87       0.46      0.69)   >   0.5
+8            :     (0.77       0.39      0.60)   >   0.5
+9            :     (0.75       0.54      0.54)   >   0.5
+10            :     (0.70       0.48      0.62)   >   0.5
+11            :     (0.66       0.44      0.57)   >   0.5
+12            :     (0.63       0.52      0.52)   >   0.5
+13            :     (0.60       0.48      0.48)   >   0.5
+14            :     (0.57       0.45      0.45)   >   0.5
+15            :     (0.54       0.42      0.42)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.33, 0.87]        false
+~        [0.00, 0.42]        false
+<        [0.00, 0.42]        false
+-------------------------------------
+
+********** C# (Processing Large Data) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** C (Processing Large Data) Javascript *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.80       0.80      0.05)   >   0.5
+7            :     (0.87       0.87      0.04)   >   0.5
+8            :     (0.77       0.77      0.04)   >   0.5
+9            :     (0.75       0.75      0.03)   >   0.5
+10            :     (0.70       0.70      0.03)   >   0.5
+11            :     (0.66       0.66      0.03)   >   0.5
+12            :     (0.62       0.63      0.26)   >   0.5
+13            :     (0.58       0.60      0.37)   >   0.5
+14            :     (0.55       0.57      0.34)   >   0.5
+15            :     (0.52       0.55      0.32)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.07, 0.59]        false
+~        [0.26, 0.81]        false
+<        [0.00, 0.32]        false
+-------------------------------------
+
+********** C (Processing Large Data) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (1.00       0.07      1.00)   >   0.5
+5            :     (0.96       0.06      0.96)   >   0.5
+6            :     (1.00       0.05      1.00)   >   0.5
+7            :     (0.87       0.04      0.87)   >   0.5
+8            :     (0.77       0.04      0.77)   >   0.5
+9            :     (0.75       0.35      0.69)   >   0.5
+10            :     (0.69       0.31      0.62)   >   0.5
+11            :     (0.64       0.28      0.57)   >   0.5
+12            :     (0.62       0.40      0.52)   >   0.5
+13            :     (0.58       0.37      0.48)   >   0.5
+14            :     (0.55       0.34      0.45)   >   0.5
+15            :     (0.52       0.32      0.42)   >   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.17 and lowerLimit <= 0)?
+>        [0.41, 0.93]        false
+~        [0.00, 0.32]        false
+<        [0.00, 0.42]        false
+-------------------------------------
+
+********** C (Processing Large Data) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Javascript (Processing Large Data) C++ *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+
+********** Javascript (Processing Large Data) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.85       0.85      0.07)   >   0.5
+5            :     (0.66       0.66      0.06)   >   0.5
+6            :     (0.54       0.54      0.05)   >   0.5
+7            :     (0.46       0.46      0.04)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.24 and lowerLimit <= 0)?
+>        [0.54, 1.00]        false
+~        [0.00, 0.46]        false
+<        [0.00, 0.04]        true
+-------------------------------------
+
+********** C++ (Processing Large Data) Python *******
+
+sampleSize    :   (CI_for_>  CI_for_<  CI_for~)   ?   threshold
+4            :     (0.07       0.00      0.07)   <   0.5
+
+ Accepted CI:
+-------------------------------------
+sign       CI              prune(upperLimit <= 0.35 and lowerLimit <= 0)?
+>        [0.00, 0.07]        true
+~        [1.00, 1.00]        false
+<        [0.00, 0.07]        true
+-------------------------------------
+Calculated Zero worlds : 58563
+zero prob question : 9
+ranks:
+  'undefined': '0.8571', 'C#': '0', 'C': '0', 'Javascript': '0', 'C++': '0', 'Python': '0.1429',

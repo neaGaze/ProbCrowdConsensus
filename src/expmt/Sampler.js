@@ -19,6 +19,7 @@ nconf.argv()
 .file({ file: __dirname + '/../../config.json' });
 
 var mongodb_url = nconf.get('CROWD_CONSENSUS_MONGO_URL');
+var CI_THRESHOLD = nconf.get("THRESHOLD_FOR_CI");
 
 // Connect mongodb
 mongoose.Promise = global.Promise;
@@ -53,32 +54,35 @@ function generateSampleSize(totalPopulation) {
 }
 
 /**
-* Find the Confidence Interval for the probabilty of event
+* calculate the Confidence Interval for the probabilty of event
 **/
-function findConfidenceInterval(n, p_gt, p_lt, p_indiff){
+function calculateCI(p, n) {
+
   var data = fs.readFileSync(__dirname+'/../../var/t-table.json', 'utf8');
   var ttable = JSON.parse(data);
   var confidenceInterval = nconf.get("CONFIDENCE_INTERVAL");
   var normalizedConfidenceLevel = math.round(((1 - confidenceInterval) / 2) * 1000) / 1000;
   var Z = ttable[n+""][normalizedConfidenceLevel+""];
 
+  var a = p * (1 - p),
+  meanError = math.sqrt(a / n.toFixed(1)),
+  adjuster = Z * meanError,
+  ci = [p - adjuster, p + adjuster];
+  return ci;
+}
+
+/**
+* Find the Confidence Interval for the probabilty of event
+**/
+function findConfidenceInterval(n, p_gt, p_lt, p_indiff) {
   // for gt
-  var a1 = p_gt * (1 - p_gt),
-  meanError1 = math.sqrt(a1 / n.toFixed(1)),
-  adjuster_1 = Z * meanError1,
-  ci1 = [p_gt - adjuster_1, p_gt + adjuster_1];
+  ci1 = calculateCI(p_gt, n);
 
   // for lt
-  var a2 = p_lt * (1 - p_lt),
-  meanError2 = math.sqrt(a2 / n.toFixed(1)),
-  adjuster_2 = Z * meanError2,
-  ci2 = [p_lt - adjuster_2, p_lt + adjuster_2];
+  ci2 = calculateCI(p_lt, n);
 
   // for lt
-  var a3 = p_indiff * (1 - p_indiff),
-  meanError3 = math.sqrt(a3 / n.toFixed(1)),
-  adjuster_3 = Z * meanError3,
-  ci3 = [p_indiff - adjuster_3, p_indiff + adjuster_3];
+  ci3 = calculateCI(p_indiff, n);
 
   var ciList = [ci1, ci2, ci3];
   // var lowerLimit = p - Z * meanError;
@@ -101,7 +105,8 @@ function Sampler(){
     for(var cr = 0; cr < sampCritSize; cr++) criteria.push(resp.criteria[cr]);
     for(var ob = 0; ob < sampObjSize; ob++) objects.push(resp.objects[ob]);
     resp.responses = []; // we clear all the response because we shall calculate that based on the new objects + criteria
-
+    // objects = ["R", "Scala","Javascript","C","Python"];
+    // criteria = ["Easiness in learning"];
     // also save it
     var wstrm1 = fs.createWriteStream(__dirname + "/input/ip.json");
     wstrm1.write(JSON.stringify({"responses" : [], "objects" : objects, "criteria" : criteria}));
@@ -122,10 +127,10 @@ function Sampler(){
       for(var q = 0; q < questionList.length; q++) {
         questionList[q].candidates = [];
         questionList[q].sampleSize = minimalSampleSize;
-  //      console.log("\n-------- "+questionList[q].object1 + "(" + questionList[q].criterion+")" + questionList[q].object2+" ----------");
+        //      console.log("\n-------- "+questionList[q].object1 + "(" + questionList[q].criterion+")" + questionList[q].object2+" ----------");
         var toSpliceList = [];
         for(var a = 0; a < replies.length; a++) {
-  //        console.log(""+replies[a].object1 + "(" + replies[a].criterion+") " + replies[a].object2);
+          //        console.log(""+replies[a].object1 + "(" + replies[a].criterion+") " + replies[a].object2);
           if((questionList[q].object1 == replies[a].object1 &&
             questionList[q].object2 == replies[a].object2 &&
             questionList[q].criterion == replies[a].criterion) ||
@@ -145,6 +150,9 @@ function Sampler(){
               replies.splice(toSpliceList[i] - i, 1);
             }
           }
+
+          // for the recording the pruned questionList
+          var prunedList = [];
 
           // aggregate the response into a probabilistic values and also find the confidence intervals
           for(var q = 0; q < questionList.length; q++) {
@@ -171,6 +179,13 @@ function Sampler(){
               // find the confidence interval for all 3 outputs
               var ciList = findConfidenceInterval(questionList[q].sampleSize, questionList[q].gt, questionList[q].lt, questionList[q].indiff)
               var ranges = [];
+
+                // if divisor < 30, use 0.3 as divisor because using 3 would result in big interval
+                // which is not what we want for a zero interval
+              var divisor = 0.3;
+              if(questionList[q].sampleSize > 30) divisor = 3;
+              divisor = divisor.toFixed(1);
+
               for(var ri = 0; ri < ciList.length; ri++) {
                 // we adjust the values within [0,1]
                 for(var i = 0; i < 2; i++) {
@@ -181,20 +196,55 @@ function Sampler(){
                 // if the range is 0, we can use the rule of 3 (3/n)
                 // look at http://www.pmean.com/01/zeroevents.html for more details
                 if((ciList[ri][1] - ciList[ri][0] == 0) && (ciList[ri][0] == 0))
-                  ciList[ri][1] = 3.0 / questionList[q].sampleSize.toFixed(2);
-              //  if((ciList[ri][1] - ciList[ri][0] == 0) && (ciList[ri][0] == 1))
-              //    ciList[ri][0] = 1.0 - (3.0 / questionList[q].sampleSize.toFixed(2));
+                ciList[ri][1] = divisor / questionList[q].sampleSize.toFixed(2);
+                //  if((ciList[ri][1] - ciList[ri][0] == 0) && (ciList[ri][0] == 1))
+                //    ciList[ri][0] = 1.0 - (3.0 / questionList[q].sampleSize.toFixed(2));
 
                 ranges.push(ciList[ri][1] - ciList[ri][0]);
                 //console.log("["+ciList[ri][0] + ", " + ciList[ri][1]+"]");
               }
 
-              console.log(questionList[q].sampleSize + "            :     (" + ranges[0].toFixed(2) + "       " + ranges[1].toFixed(2) + "      " + ranges[2].toFixed(2) + ")   " +
+              console.log(questionList[q].sampleSize + "            :     (" + ranges[0].toFixed(2) +
+               "       " + ranges[1].toFixed(2) + "      " + ranges[2].toFixed(2) + ")   " +
               ((ranges[0] < THRESHOLD && ranges[1] < THRESHOLD && ranges[2] < THRESHOLD) ? "<" : ">") + "   " + THRESHOLD);
               if(ranges[0] < THRESHOLD && ranges[1] < THRESHOLD && ranges[2] < THRESHOLD) break;
               questionList[q].sampleSize++;
             }
+            // now find the CI of the pruning threshold too. For Eg: if we want to decide prob below 0.05 as 0,
+            // find the CI of 0.05 too
+            var pruningThres = nconf.get("PRUNING_THRESHOLD"),
+            pruningCI = calculateCI(pruningThres, questionList[q].sampleSize);
+            if(pruningCI[1] > 1) pruningCI[1] = 1; // to make sure that it doesn't go beyond 1
+            if(pruningCI[1] <= 0) pruningCI[1] = divisor / questionList[q].sampleSize.toFixed(2);
+            var pruneRange = pruningCI[1] - 0; // 0 because we assume the lower limit will always be zero for small prob
+
+            console.log("\n Accepted CI:");
+            console.log("-------------------------------------");
+            console.log("sign       CI              prune(upperLimit <= "+pruneRange.toFixed(2)+" and lowerLimit <= 0)?");
+            console.log(">        ["+ciList[0][0].toFixed(2)+", "+ciList[0][1].toFixed(2)+"]        " + ((ciList[0][0] == 0 && ranges[0] <= pruneRange) ? true : false));
+            console.log("~        ["+ciList[1][0].toFixed(2)+", "+ciList[1][1].toFixed(2)+"]        " + ((ciList[1][0] == 0 && ranges[1] <= pruneRange) ? true : false));
+            console.log("<        ["+ciList[2][0].toFixed(2)+", "+ciList[2][1].toFixed(2)+"]        " + ((ciList[2][0] == 0 && ranges[2] <= pruneRange) ? true : false));
+            console.log("-------------------------------------");
+
+            // also add the pruned ones in the list
+            var pruneCount = 0;
+            if(ciList[0][0] == 0 && ranges[0] <= pruneRange) pruneCount++;
+            if(ciList[1][0] == 0 && ranges[1] <= pruneRange) pruneCount++;
+            if(ciList[2][0] == 0 && ranges[2] <= pruneRange) pruneCount++;
+            prunedList.push(pruneCount);
           }
+
+          // sort the prunedList in descending order and calculate the total number of possible worlds
+          prunedList.sort(function(a,b){b-a});
+          var numQues = questionList.length;
+          var multipliend =  math.pow(3, numQues);
+          var curVal = 0;
+          for(var p = 0; p < prunedList.length; p++) {
+            curVal += prunedList[p] * (multipliend / 3);
+            multipliend = math.pow(3, numQues) - curVal;
+          }
+          console.log("Calculated Zero worlds : "+curVal);
+          console.log("  worlds : "+curVal);
 
           // write inputs into file
           var inputFileName = "/input/"+sampObjSize+"o"+sampCritSize+"c"+".json";
@@ -207,7 +257,7 @@ function Sampler(){
             // now call the algorithm
             var totalWorld = math.pow(3, questionList.length);
             var chunkSize = totalWorld, iter = 1;
-            while(chunkSize > 400000) {
+            while(chunkSize > 600000) {
               chunkSize = chunkSize / 10;
               chunkSize = chunkSize >> 0;  // convert into integer
               iter *= 10;

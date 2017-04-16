@@ -1,0 +1,193 @@
+==================================================================================
+Keeping all other variables constant, experiment by changing the size of the objects
+==================================================================================
+
+CONSTANTS
+---------------------------
+Total Population: 15
+Confidence Level: 0.95
+Minimal Sample Size: 4
+Pruning Threshold : 0.05
+Margin of Error : 0.5
+
+VARIABLES
+---------------------------
+Number of Objects
+Number of Criteria
+
+==================================================================================
+Number of Objects: 2
+Number of Criteria: 1
+==================================================================================
+objects:
+  Java, C
+criteria :
+  Prototyping
+ranks :
+  'undefined': '0', 'Java': '0.4', 'C': '0.6'
+zero prob : 1
+zero worlds: 1
+total worlds : 3
+ratio : 0.333
+
+==================================================================================
+Number of Objects: 3
+Number of Criteria: 1
+==================================================================================
+objects:
+  Java, C, C++
+criteria :
+  Prototyping
+ranks :
+  'undefined': '0.1431', 'Java': '0.2933', 'C': '0.48', 'C++': '0.1333'
+zero prob : 1
+zero worlds: 9
+total worlds : 27
+ratio : 0.333
+
+==================================================================================
+Number of Objects: 4
+Number of Criteria: 1
+==================================================================================
+objects:
+  Java, C, C++, C#
+criteria :
+  Prototyping
+ranks :
+  'undefined': '0.2629', 'Java': '0.264', 'C': '0.384', 'C++': '0.1156', 'C#': '0.0142'
+zero prob : 1
+zero worlds: 243
+total worlds : 729
+ratio : 0.333
+
+==================================================================================
+Number of Objects: 5
+Number of Criteria: 1
+==================================================================================
+objects:
+  Java, C, C++, C#, Python
+criteria :
+  Prototyping
+ranks :
+  'undefined': '0', 'Java': '0', 'C': '0', 'C++': '0', 'C#': '0.002', 'Python': '1'
+zero prob : 8
+zero worlds: 58077
+total worlds : 59049
+ratio : 0.9835
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+==================================================================================
+Number of Objects: 2
+Number of Criteria: 2
+==================================================================================
+objects:
+  Java, C
+criteria :
+  Prototyping, Processing Large Data
+ranks :
+  'undefined': '0', 'Java': '0.4', 'C': '0.6'
+zero prob : 1
+zero worlds: 3
+total worlds : 9
+ratio : 0.333
+
+==================================================================================
+Number of Objects: 3
+Number of Criteria: 2
+==================================================================================
+objects:
+  Java, C, C++
+criteria :
+  Prototyping, Processing Large Data
+result ->
+  'undefined': '0.0273', 'Java': '0.785', 'C': '0.6057', 'C++': '0.1274'
+zero prob : 1
+zero worlds: 243
+total worlds : 729
+ratio : 0.333
+
+==================================================================================
+Number of Objects: 4
+Number of Criteria: 2
+==================================================================================
+objects:
+  Java, C, C++, C#
+criteria :
+  Prototyping, Processing Large Data
+result ->
+  'undefined': '0.0489', 'Java': '0.7483', 'C': '0.5715', 'C++': '0.1172', 'C#': '0.0263'
+zero prob : 1
+zero worlds: 177147
+total worlds : 531441
+ratio : 0.333
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+==================================================================================
+Number of Objects: 2
+Number of Criteria: 3
+==================================================================================
+objects:
+  Java, C
+criteria :
+  Prototyping, Processing Large Data, Speed of Processing
+ranks :
+  'undefined': '0', 'Java': '0.8615', 'C': '1'
+zero prob : 3
+zero worlds: 21
+total worlds : 27
+ratio : 0.778
+
+==================================================================================
+Number of Objects: 3
+Number of Criteria: 3
+==================================================================================
+objects:
+  Java, C, C++
+criteria :
+  Prototyping, Processing Large Data, Speed of Processing
+result ->
+  'undefined': '0', 'Java': '0.7696', 'C': '0.9739', 'C++': '0.4027'
+zero prob : 5
+zero worlds: 18225
+total worlds : 19683
+ratio : 0.9259
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+==================================================================================
+Number of Objects: 2
+Number of Criteria: 4
+==================================================================================
+objects:
+  Java, C
+criteria :
+  Prototyping, Processing Large Data, Speed of Processing, Easiness in learning
+ranks :
+  'undefined': '0', 'Java': '0.9446', 'C': '1'
+zero prob : 3
+zero worlds: 63
+total worlds : 81
+ratio : 0.7654
+
+==================================================================================
+Number of Objects: 3
+Number of Criteria: 4
+==================================================================================
+objects:
+  Java, C, C++
+criteria :
+  Prototyping, Processing Large Data, Speed of Processing, Easiness in learning
+ranks :
+  'undefined': '0', 'Java': '0.9302', 'C': '0.9941', 'C++': '0.5193',
+zero prob : 7
+zero worlds: 513945
+total worlds : 531441
+ratio : 0.9671
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
